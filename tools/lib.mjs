@@ -4,12 +4,40 @@ import { join, relative, sep, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const ROOT = fileURLToPath(new URL('..', import.meta.url));
+/** Skill 群の置き場。src/<skill-name>/SKILL.md が 1 つの Skill を成す。 */
 export const SRC = join(ROOT, 'src');
 export const DIST = join(ROOT, 'dist');
-/** ZIP 内のトップレベルフォルダ名。既存 adversarial-answer.zip と同形式を保つ。 */
-export const PACKAGE_PREFIX = 'adversarial-answer';
 
-/** dir 以下の全ファイルを skill root 相対の posix パスで返す。 */
+/** src/ 直下で SKILL.md を持つディレクトリを Skill として列挙する。 */
+export function listSkills() {
+  if (!existsSync(SRC)) return [];
+  return readdirSync(SRC)
+    .filter((name) => statSync(join(SRC, name)).isDirectory())
+    .filter((name) => existsSync(join(SRC, name, 'SKILL.md')))
+    .sort();
+}
+
+export const skillDir = (name) => join(SRC, name);
+
+/**
+ * コマンドライン引数から対象 Skill を決める。
+ *   --skill=<name> … その Skill だけ
+ *   指定なし        … すべての Skill
+ */
+export function resolveTargets(argv = process.argv) {
+  const all = listSkills();
+  const arg = argv.find((a) => a.startsWith('--skill='));
+  if (!arg) return all;
+  const name = arg.slice('--skill='.length);
+  if (!all.includes(name)) {
+    console.error(`Skill が見つかりません: ${name}`);
+    console.error(`利用可能: ${all.join(', ') || '(なし)'}`);
+    process.exit(1);
+  }
+  return [name];
+}
+
+/** dir 以下の全ファイルを base 相対の posix パスで返す。 */
 export function walk(dir, base = dir) {
   if (!existsSync(dir)) return [];
   const out = [];
@@ -61,10 +89,17 @@ export function parseManifest(text) {
 }
 
 export class Report {
-  constructor() { this.errors = []; this.warns = []; this.infos = []; }
-  error(msg) { this.errors.push(msg); }
-  warn(msg) { this.warns.push(msg); }
-  info(msg) { this.infos.push(msg); }
+  constructor() {
+    this.errors = [];
+    this.warns = [];
+    this.infos = [];
+    this.prefix = '';
+  }
+  /** 複数 Skill を 1 つの Report へ集約するとき、メッセージ頭に Skill 名を付ける。 */
+  scope(name) { this.prefix = name ? `[${name}] ` : ''; return this; }
+  error(msg) { this.errors.push(this.prefix + msg); }
+  warn(msg) { this.warns.push(this.prefix + msg); }
+  info(msg) { this.infos.push(this.prefix + msg); }
   print() {
     for (const m of this.infos) console.log(`  info  ${m}`);
     for (const m of this.warns) console.log(`  WARN  ${m}`);

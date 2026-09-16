@@ -2,7 +2,7 @@
   "name": "adversarial-answer",
   "version": "2.0.0",
   "private": true,
-  "description": "adversarial-answer Skill — Failure Mode Router による敵対的検証回答スキル",
+  "description": "GPT Skills リポジトリ。src/<skill-name>/ ごとに 1 つの Skill を持ち、dist/<skill-name>/skill.zip を生成する",
   "type": "module",
   "scripts": {
     "validate": "node tools/validate.mjs",
@@ -10,7 +10,7 @@
     "build": "node tools/build.mjs",
     "hash": "node tools/hash.mjs",
     "verify": "node tools/verify-package.mjs",
-    "check": "npm run build -- --require-v2 && npm run verify"
+    "check": "node tools/check.mjs"
   },
   "dependencies": {
     "jszip": "^3.10.1"

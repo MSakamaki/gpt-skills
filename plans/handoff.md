@@ -34,22 +34,29 @@
 
 ## 2. リポジトリ
 
+複数 Skill を持てる構成になっている。`src/` 直下で `SKILL.md` を持つディレクトリが 1 つの Skill で、ディレクトリ名は `SKILL.md` の `name` と一致させる (不一致は検証エラー)。
+
 ```text
-adversarial-answer/
-├── src/        Skill 本体。ZIP 化される唯一の範囲
+adversarial-answer/                  ← リポジトリ名は最初の Skill 由来
+├── src/
+│   └── adversarial-answer/          Skill 本体。ZIP 化される唯一の範囲
 ├── tools/      node 製の検証・ビルド・PDF 調査ツール (配布対象外)
 ├── docs/       フェーズ成果物 (配布対象外)
 ├── plans/      正本仕様と本書 (配布対象外)
-└── dist/       skill.zip (git 管理外)
+└── dist/
+    └── adversarial-answer/skill.zip (git 管理外)
 ```
 
 ```bash
 npm install
-npm run check    # validate(strict) -> build -> verify-package。リリース前はこれ
+npm run check    # build(strict) -> verify-package。リリース前はこれ
+npm run check -- --skill=adversarial-answer   # 1 つだけ対象にする
 npm run hash -- <file>                    # Manifest 用 SHA256 / File Size
 node tools/pdfinfo.mjs <file.pdf>         # タイトル・著者・ライセンス表記
 node tools/pdftext.mjs <file.pdf> 1 3     # 指定ページのテキスト
 ```
+
+検証は `SKILL.md` と `agents/openai.yaml` だけを全 Skill 共通の必須とし、`references/methods/` または `METHOD-ROUTING.md` を持つ Skill にだけ Method Card と Manifest の完全性を要求する。`adversarial-answer` 以外の Skill を追加しても、この Skill の検証条件は変わらない。
 
 ---
 

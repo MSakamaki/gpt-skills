@@ -2,35 +2,59 @@
 
 依頼を 10 項目で確定し、想定される失敗モードに適した敵対的検証を 3 回行って回答を作る Skill。
 
-配布物は `dist/skill.zip`。Skill 本体は `src/` 配下だけで、`tools/` `docs/` `plans/` はパッケージに含まれない。
+配布物は `dist/<skill-name>/skill.zip`。`src/` は複数の Skill を持てるリポジトリで、`src/` 直下で `SKILL.md` を持つディレクトリが 1 つの Skill になる。`tools/` `docs/` `plans/` はパッケージに含まれない。
 
 ## 構成
 
+```text
+src/
+└── adversarial-answer/          ← ディレクトリ名 = SKILL.md の name
+    ├── SKILL.md
+    ├── agents/openai.yaml
+    ├── assets/icon.svg
+    └── references/
+```
+
 | パス | 内容 |
 |---|---|
-| `src/SKILL.md` | Skill 本体。実行フロー |
-| `src/agents/openai.yaml` | ChatGPT / Codex 向けメタデータ |
-| `src/references/METHOD-ROUTING.md` | Problem Profile → Failure Mode → Applicability → Method のルーティング仕様 |
-| `src/references/methods/` | Method Card。実行仕様の正本 |
-| `src/references/papers/` | 方法論の一次根拠 PDF |
-| `src/references/REFERENCE-MANIFEST.md` | 論文のメタデータ・ライセンス・SHA256 |
-| `src/references/ROUTER-TEST-CASES.md` | Router の回帰テスト |
+| `src/<skill>/SKILL.md` | Skill 本体。実行フロー |
+| `src/<skill>/agents/openai.yaml` | ChatGPT / Codex 向けメタデータ |
+| `src/<skill>/references/METHOD-ROUTING.md` | Problem Profile → Failure Mode → Applicability → Method のルーティング仕様 |
+| `src/<skill>/references/methods/` | Method Card。実行仕様の正本 |
+| `src/<skill>/references/papers/` | 方法論の一次根拠 PDF |
+| `src/<skill>/references/REFERENCE-MANIFEST.md` | 論文のメタデータ・ライセンス・SHA256 |
+| `src/<skill>/references/ROUTER-TEST-CASES.md` | Router の回帰テスト |
 | `plans/` | 正本仕様。**編集しない** |
 | `docs/` | 実装計画などの開発用ドキュメント |
+
+`references/` 以下は `adversarial-answer` 固有の構成で、他の Skill に必須ではない。検証は `SKILL.md` と `agents/openai.yaml` だけを全 Skill 共通の必須とし、`references/methods/` または `METHOD-ROUTING.md` を持つ Skill にだけ Method Card と Manifest の完全性を要求する。
+
+### 新しい Skill を追加する
+
+1. `src/<skill-name>/SKILL.md` を作る。frontmatter の `name` はディレクトリ名と一致させる (不一致は検証エラー)
+2. `src/<skill-name>/agents/openai.yaml` を作る
+3. `npm run check` を実行する
 
 ## コマンド
 
 ```bash
 npm install
 npm run check             # build (strict) + verify。リリース前はこれを使う
-npm run validate          # src/ の構造検証 (v2 成果物の欠落は WARN)
+npm run validate          # 構造検証 (v2 成果物の欠落は WARN)
 npm run validate:strict   # v2 成果物の欠落を ERROR にする
-npm run build             # 検証したうえで dist/skill.zip を生成
-npm run verify            # 生成済み dist/skill.zip 自体を検証
+npm run build             # 検証したうえで dist/<skill>/skill.zip を生成
+npm run verify            # 生成済み ZIP 自体を検証
 npm run hash -- <file>    # Manifest 用の SHA256 / File Size を出力
 ```
 
-`npm run build` は `src/` の全ファイルを `adversarial-answer/` 配下に置いた ZIP を生成する。再現性のためファイルの更新時刻は固定される。
+いずれも引数なしで全 Skill を対象にする。1 つだけ扱う場合は `--skill=<name>` を付ける。
+
+```bash
+npm run build -- --skill=adversarial-answer
+npm run check -- --skill=adversarial-answer
+```
+
+`npm run build` は `src/<skill>/` の全ファイルを ZIP 内の `<skill>/` 配下へ置く。再現性のため、ファイルとフォルダ双方のエントリ日時を固定している。
 
 論文を追加する際は次の 2 つを使う。どちらも配布物には含まれない。
 
