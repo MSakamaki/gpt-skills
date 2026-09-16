@@ -139,7 +139,7 @@ Candidate に対し、v2 を良いと仮定せずに攻撃した。
 
 **発見 1**: ページ引用が PDF ページか印刷ページか区別されていなかった。RDM は章が印刷 p.23 から始まるため、引用が実際と 22 ページずれて読める状態だった。→ **修正済み**。すべて `PDF p.N (印刷 p.M)` 形式へ統一した。
 
-**発見 2**: `METHOD-ABP.md` の `Research-backed` は「load-bearing / vulnerable」という区分を原典由来として書いているが、根拠は RAND の Landing Page と plans2 の記述だけで、原典本文は未参照 (PDF が暗号化されており抽出不能)。Card はその旨を `Evidence` と `Evidence Strength` に明記しており、過剰一般化には至っていないと判断する。ただし **本 Skill で最も根拠が薄い Card** である。
+**発見 2**: `METHOD-ABP.md` の `Research-backed` は「load-bearing / vulnerable」という区分を原典由来として書いているが、根拠は RAND の Landing Page の記述だけで、原典本文は未参照 (PDF が暗号化されており抽出不能)。Card はその旨を `Evidence` と `Evidence Strength` に明記しており、過剰一般化には至っていないと判断する。ただし **本 Skill で最も根拠が薄い Card** である。
 
 **発見 3**: `METHOD-DEFEATER.md` は原典が defeater の体系的探索を扱っていないことを明記し、探索手順を Skill 固有として分離している。これは適切。
 
@@ -151,7 +151,7 @@ PDF 未同梱の 5 Method (PREMORTEM / ABP / ACH / CONSIDER_OPPOSITE / SOCRATIC)
 
 ### 5.4 3 Method 制限で重要 Failure Mode を落としていないか
 
-落としうる。`F01 + F04 + F05 + F06 + F09` が同時に `CRITICAL` になるケースでは 3 Method で覆えない。`METHOD-ROUTING.md` §7 と `SKILL.md` §4 が「Coverage できなかった Failure Mode を制約として記録する」と定めており、**隠さずに残す**設計になっている。制限そのものは plans2 §23 の仕様であり変更しない。
+落としうる。`F01 + F04 + F05 + F06 + F09` が同時に `CRITICAL` になるケースでは 3 Method で覆えない。`METHOD-ROUTING.md` §7 と `SKILL.md` §4 が「Coverage できなかった Failure Mode を制約として記録する」と定めており、**隠さずに残す**設計になっている。制限そのものは [spec/adversarial-answer.md](spec/adversarial-answer.md) §1 の仕様であり変更しない。
 
 ### 5.5 Invariant Gate が形骸化していないか
 

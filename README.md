@@ -1,13 +1,15 @@
 # GPT Skills
 
-ChatGPT / Codex 向けの Skill をまとめたリポジトリ。`src/` 直下で `SKILL.md` を持つディレクトリが 1 つの Skill になり、Skill ごとに `dist/<skill-name>/skill.zip` を生成する。
+ChatGPT 向けの Skill をまとめたリポジトリ (一部は Codex / API にも対応)。`src/` 直下で `SKILL.md` を持つディレクトリが 1 つの Skill になり、Skill ごとに `dist/<skill-name>/skill.zip` を生成する。
 
 ## Skill 一覧
 
-| Skill | 内容 |
-|---|---|
-| [adversarial-answer](src/adversarial-answer/SKILL.md) | 依頼を 10 項目で確定し、想定される失敗モードに適した敵対的検証を 3 回行って回答を作る |
-| [guided-clarification](src/guided-clarification/SKILL.md) | 最終回答を実質的に変える確認だけを `0/1/2/3/9` の選択式で 1 問ずつ行ってから回答する |
+| Skill | 内容 | 対応プロダクト |
+|---|---|---|
+| [adversarial-answer](src/adversarial-answer/SKILL.md) | 依頼を 10 項目で確定し、想定される失敗モードに適した敵対的検証を 3 回行って回答を作る | chatgpt / codex / api / atlas |
+| [guided-clarification](src/guided-clarification/SKILL.md) | 最終回答を実質的に変える確認だけを `0/1/2/3/9` の選択式で 1 問ずつ行ってから回答する | chatgpt |
+
+対応プロダクトは各 Skill の `agents/openai.yaml` の `policy.products` が正本。どちらも `allow_implicit_invocation: false` で、ユーザーが明示的に起動したときだけ動く。
 
 ## リポジトリ構成
 
@@ -18,8 +20,14 @@ gpt-skills/
 │   └── guided-clarification/
 ├── tools/                   検証・ビルド・PDF 調査ツール (Node)
 ├── docs/                    開発用ドキュメント
-├── plans/                   正本仕様と引き継ぎ資料
+│   ├── spec/common.md       全 Skill 共通の規定
+│   ├── spec/<skill-name>.md Skill ごとの仕様 (設計判断と研究根拠)
+│   ├── test/<skill-name>.md 受入基準・テストケースの評価結果
+│   ├── handoff.md           現在の状態と次にやること
+│   └── handoff-history.md   改訂履歴
+├── plans/                   進行中の計画・調査メモ (完了したら docs/ へ。現在は空)
 ├── dist/                    <skill-name>/skill.zip (git 管理外)
+├── .github/workflows/       CI。push と PR で npm run check
 ├── .githooks/pre-commit     秘密情報スキャン (commit 時に自動実行)
 ├── README.md
 └── CLAUDE.md                メンテナンス手順
@@ -42,6 +50,8 @@ src/adversarial-answer/          ← ディレクトリ名 = SKILL.md の name
 
 検証は `SKILL.md` と `agents/openai.yaml` だけを全 Skill 共通の必須とし、`references/methods/` または `METHOD-ROUTING.md` を持つ Skill にだけ Method Card と Manifest の完全性を要求する。
 
+`REFERENCE-MANIFEST.md` と `ROUTER-TEST-CASES.md` は `SKILL.md` からの参照を持たず、実行時には読み込まれない。それでも配布物へ含めているのは、**同梱の根拠 (出所・ライセンス) と Router の検証状況を、配布物だけを見て確認できるようにするため。** 2 ファイルで約 52KB あるが、ZIP 全体 (約 3.4MB、大半が PDF) の 1.5% で、25MB 制限には影響しない。
+
 ### 新しい Skill を追加する
 
 1. `src/<skill-name>/SKILL.md` を作る。frontmatter の `name` はディレクトリ名と一致させる (不一致は検証エラー)
@@ -54,7 +64,7 @@ src/adversarial-answer/          ← ディレクトリ名 = SKILL.md の name
 
 ```bash
 npm install
-npm run check             # build (strict) + verify。リリース前はこれを使う
+npm run check             # scan + build (strict) + verify。リリース前はこれを使う
 npm run validate          # 構造検証 (v2 成果物の欠落は WARN)
 npm run validate:strict   # v2 成果物の欠落を ERROR にする
 npm run build             # 検証したうえで dist/<skill>/skill.zip を生成
@@ -105,9 +115,11 @@ npm run hooks:install       # 明示的に有効化する場合
 git config core.hooksPath   # .githooks と出れば有効
 ```
 
-### 2. `npm run check` (リリース前)
+### 2. `npm run check` (リリース前) と CI
 
-`check` の最初のステップとして、追跡中 + 未追跡 (ignore 対象外) の全ファイルをスキャンする。
+`check` の最初のステップとして、追跡中 + 未追跡 (ignore 対象外) の全ファイルをスキャンする。`.github/workflows/check.yml` が main への push と全 Pull Request で同じ `check` を走らせるため、ローカルで実行し忘れても検証を通らない変更は main に積まれない。
+
+**CI には `.secrets-denylist` が無い** (git 管理外のため)。そのままだと組織固有語の検査だけが効かないので、リポジトリ Secret に `SECRETS_DENYLIST` を登録しておくと CI が復元して検査する。未登録でも CI は失敗せず、警告を出したうえでトークン・個人情報の検査だけを行う。
 
 ### 3. `.gitignore` (そもそも追跡させない)
 
@@ -126,8 +138,10 @@ git config core.hooksPath   # .githooks と出れば有効
 ルールが実際に発火するかは自己テストで確認できる。
 
 ```bash
-npm run scan:selftest    # 検出 15 ケース / 非検出 10 ケース
+npm run scan:selftest    # 検出されるべき見本と、されてはいけない見本を両方走らせる
 ```
+
+見本は `tools/scan-secrets.mjs` の `selftest()` にある。件数はコマンドの出力が持っているので、ここには書かない。ルールを足したら見本も足す。
 
 ### 組織固有の語を登録する
 
@@ -161,3 +175,9 @@ PDF は方法論の一次根拠であり、実行仕様ではない。実行仕�
 - 著者・所属機関が公開している著者版
 
 出版社の有料版は同梱しない。**著者サイトで無償公開されていても、実体が出版社の組版版であるものは同梱しない。** 各 PDF の License と Redistribution Allowed は `REFERENCE-MANIFEST.md` に記録する。
+
+### `UNKNOWN` ライセンスの 4 本について
+
+同梱 6 本のうち 4 本 (`PAPER-AR` / `PAPER-MARE` / `PAPER-ELICITRON` / `PAPER-MAD-RE`) は `Redistribution Allowed: UNKNOWN` である。原則は `UNKNOWN` / `NO` を自動同梱しないことだが、**この 4 本の同梱は正式な現行仕様**として [docs/spec/adversarial-answer.md](docs/spec/adversarial-answer.md) §47 が定めている。いずれも arXiv 標準ライセンス版と著者所属機関の公開版で、`UNKNOWN` は再配布が禁じられていることではなく、明示的な許諾を確認できていないことを意味する。
+
+保守的運用へ切り替える場合は、**仕様変更**として §47 を改めたうえで 4 本を ZIP から外し、Manifest の記載だけを残す。Method Card が実行仕様なので、外しても動作は変わらない。
