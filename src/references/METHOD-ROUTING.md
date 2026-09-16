@@ -97,7 +97,7 @@ Method 選択では `CRITICAL` → `MAJOR` の順に Coverage する。`MINOR` �
 | `F05` FUTURE | `ROBUST_DECISION_MAKING` (変数 2 つ以上) | `ASSUMPTION_BASED_PLANNING` (前提単位) | — |
 | `F06` PERSPECTIVE | `REQUIREMENTS_ELICITATION` | — | `MARE_PROCESS_SEPARATION` |
 | `F07` CONSENSUS | — (CORE-AR が担当) | `CONSIDER_OPPOSITE` | `INDEPENDENT_FIRST` / `MINORITY_DISSENT` |
-| `F08` EVIDENCE | `DEFEATER` | `COMPETING_HYPOTHESES` | — |
+| `F08` EVIDENCE | `DEFEATER` (※) | `COMPETING_HYPOTHESES` | — |
 | `F09` DEFEATER | `DEFEATER` | — | — |
 | `F10` UNCERTAINTY | `ROBUST_DECISION_MAKING` | — | `FORECAST_CALIBRATION` |
 | `F11` AMBIGUITY | `SOCRATIC` | `REQUIREMENTS_ELICITATION` | — |
@@ -106,6 +106,16 @@ Method 選択では `CRITICAL` → `MAJOR` の順に Coverage する。`MINOR` �
 | `F14` CONSTRAINT | `PREMORTEM` | `ASSUMPTION_BASED_PLANNING` / `ROBUST_DECISION_MAKING` / `REQUIREMENTS_ELICITATION` | — |
 | `F15` CAUSALITY | `COMPETING_HYPOTHESES` | `SOCRATIC` | — |
 | `F16` OVERCORRECTION | — (Invariant Gate G7 が担当) | `DEFEATER` | — |
+
+### ※ F08 EVIDENCE の扱い
+
+`F08` を検出しただけで `DEFEATER` を当てない。次のいずれかを満たす場合に限る。
+
+- 回答仕様が高保証を求めている (Problem Profile に `ASSURANCE` が含まれる)
+- `F08` または `F09` の Severity が `CRITICAL`
+- 覆ると結論が変わる主張が特定でき、その反証条件を書ける
+
+いずれも満たさない場合、根拠不足は Invariant Gate の `G3 FACT` と `G6 SOURCE` で扱う。出典との突き合わせで決着する事実確認に `DEFEATER` を当てると、確認で済む事項を過剰な指摘へ膨らませ、`RC8` が問う False Positive を増やす。
 
 ### F13 に専任 Method がないこと
 
