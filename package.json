@@ -1,5 +1,5 @@
 {
-  "name": "adversarial-answer",
+  "name": "gpt-skills",
   "version": "2.0.0",
   "private": true,
   "description": "GPT Skills リポジトリ。src/<skill-name>/ ごとに 1 つの Skill を持ち、dist/<skill-name>/skill.zip を生成する",
@@ -10,7 +10,12 @@
     "build": "node tools/build.mjs",
     "hash": "node tools/hash.mjs",
     "verify": "node tools/verify-package.mjs",
-    "check": "node tools/check.mjs"
+    "check": "node tools/check.mjs",
+    "scan": "node tools/scan-secrets.mjs",
+    "scan:staged": "node tools/scan-secrets.mjs --staged",
+    "scan:selftest": "node tools/scan-secrets.mjs --selftest",
+    "hooks:install": "node tools/install-hooks.mjs",
+    "prepare": "node tools/install-hooks.mjs"
   },
   "dependencies": {
     "jszip": "^3.10.1"

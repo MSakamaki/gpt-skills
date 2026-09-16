@@ -1,0 +1,12 @@
+#!/bin/sh
+# 秘密情報がコミットへ入るのを防ぐ。
+# 有効化: npm install (prepare が自動実行) または npm run hooks:install
+# 一時的に飛ばす: git commit --no-verify  ← 本当に誤検出のときだけ
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "pre-commit: node が見つからないため秘密情報スキャンを実行できません。" >&2
+  echo "            node を入れるか、内容を自分で確認してから --no-verify で commit してください。" >&2
+  exit 1
+fi
+
+node "$(git rev-parse --show-toplevel)/tools/scan-secrets.mjs" --staged || exit 1

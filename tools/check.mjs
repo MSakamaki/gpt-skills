@@ -1,10 +1,11 @@
 /**
- * リリース前の一括チェック。build (strict) → verify-package を順に実行する。
+ * リリース前の一括チェック。scan-secrets → build (strict) → verify-package を順に実行する。
  *   node tools/check.mjs
  *   node tools/check.mjs --skill=<name>
  *
- * 引数はそのまま両方へ渡す。npm script 経由でも引数が確実に届くよう、
+ * 引数はそのまま build / verify へ渡す。npm script 経由でも引数が確実に届くよう、
  * シェルの && ではなくこのスクリプトで連結している。
+ * scan-secrets は Skill 単位ではなくリポジトリ全体が対象なので、引数を渡さない。
  */
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
@@ -13,6 +14,7 @@ import { ROOT } from './lib.mjs';
 const passthrough = process.argv.slice(2);
 
 const steps = [
+  { name: 'scan-secrets', args: [join(ROOT, 'tools', 'scan-secrets.mjs')] },
   { name: 'build', args: [join(ROOT, 'tools', 'build.mjs'), '--require-v2', ...passthrough] },
   { name: 'verify', args: [join(ROOT, 'tools', 'verify-package.mjs'), ...passthrough] },
 ];
