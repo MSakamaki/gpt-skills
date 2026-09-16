@@ -32,6 +32,9 @@ const zip = new JSZip();
 for (const rel of files) {
   zip.file(`${PACKAGE_PREFIX}/${rel}`, readFileSync(join(SRC, rel)), { date: FIXED_DATE });
 }
+// JSZip が暗黙に作るフォルダエントリには生成時刻が入るため、すべて固定日時へ揃える。
+// これをしないと同じ src/ から実行のたびに別バイト列の ZIP ができる。
+for (const entry of Object.values(zip.files)) entry.date = FIXED_DATE;
 
 const buffer = await zip.generateAsync({
   type: 'nodebuffer',

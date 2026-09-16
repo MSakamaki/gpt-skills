@@ -8,7 +8,9 @@
     "validate": "node tools/validate.mjs",
     "validate:strict": "node tools/validate.mjs --require-v2",
     "build": "node tools/build.mjs",
-    "hash": "node tools/hash.mjs"
+    "hash": "node tools/hash.mjs",
+    "verify": "node tools/verify-package.mjs",
+    "check": "npm run build -- --require-v2 && npm run verify"
   },
   "dependencies": {
     "jszip": "^3.10.1"
