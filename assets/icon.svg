@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">回答精度向上を表すフクロウのアイコン</title>
+  <desc id="desc">メガネをかけたフクロウがチェックマークと上昇グラフの書類を持つ、シンプルなフラットデザインのアイコン。</desc>
+
+  <!-- background -->
+  <rect width="1024" height="1024" fill="#FFFFFF"/>
+  <circle cx="500" cy="500" r="390" fill="#E6F3EA"/>
+  <ellipse cx="500" cy="870" rx="250" ry="34" fill="#D6E8DF"/>
+
+  <!-- owl body -->
+  <ellipse cx="430" cy="615" rx="235" ry="270" fill="#A45D2F"/>
+  <ellipse cx="430" cy="660" rx="132" ry="198" fill="#F6E6C9"/>
+
+  <!-- owl head with ear tufts -->
+  <path d="M236 384
+           C220 328 222 280 240 234
+           C295 276 339 286 376 272
+           C414 256 452 250 492 252
+           C543 253 590 268 633 294
+           C668 287 706 267 746 232
+           C756 284 749 330 724 369
+           C743 372 756 381 764 394
+           C749 415 734 429 714 438
+           C722 466 724 491 718 517
+           C700 603 614 656 491 656
+           C359 656 263 604 241 522
+           C233 492 235 461 245 431
+           C225 418 211 402 202 382
+           C215 378 226 379 236 384 Z" fill="#A45D2F"/>
+
+  <!-- face patches -->
+  <ellipse cx="352" cy="432" rx="130" ry="146" fill="#F8EBD5"/>
+  <ellipse cx="550" cy="432" rx="130" ry="146" fill="#F8EBD5"/>
+  <path d="M382 331 C420 350 446 381 461 425 C476 382 505 350 544 332 C507 306 470 296 430 298 C411 299 395 310 382 331 Z" fill="#D89A63"/>
+
+  <!-- eyes -->
+  <ellipse cx="355" cy="437" rx="42" ry="62" fill="#33261D"/>
+  <ellipse cx="551" cy="437" rx="42" ry="62" fill="#33261D"/>
+  <circle cx="370" cy="414" r="12" fill="#FFFFFF"/>
+  <circle cx="566" cy="414" r="12" fill="#FFFFFF"/>
+
+  <!-- glasses -->
+  <circle cx="350" cy="438" r="92" fill="none" stroke="#2C241E" stroke-width="16"/>
+  <circle cx="556" cy="438" r="92" fill="none" stroke="#2C241E" stroke-width="16"/>
+  <path d="M442 438 C462 421 485 421 505 438" fill="none" stroke="#2C241E" stroke-width="16" stroke-linecap="round"/>
+  <path d="M256 432 L224 432" stroke="#2C241E" stroke-width="16" stroke-linecap="round"/>
+  <path d="M648 432 L682 424" stroke="#2C241E" stroke-width="16" stroke-linecap="round"/>
+
+  <!-- beak -->
+  <path d="M430 432 C453 432 468 447 468 465 C468 482 452 505 431 523 C408 505 393 482 393 465 C393 447 408 432 430 432 Z" fill="#F2AD1B"/>
+
+  <!-- belly marks -->
+  <path d="M409 641 Q430 665 451 641" fill="none" stroke="#DCB98C" stroke-width="14" stroke-linecap="round"/>
+  <path d="M365 695 Q388 720 411 695" fill="none" stroke="#DCB98C" stroke-width="14" stroke-linecap="round"/>
+  <path d="M449 695 Q472 720 495 695" fill="none" stroke="#DCB98C" stroke-width="14" stroke-linecap="round"/>
+  <path d="M406 750 Q430 776 454 750" fill="none" stroke="#DCB98C" stroke-width="14" stroke-linecap="round"/>
+
+  <!-- left wing -->
+  <path d="M246 595 C184 640 181 752 224 819 C254 864 309 875 350 851 C382 833 371 785 340 742 C315 705 306 669 313 630 C294 605 271 592 246 595 Z" fill="#744424"/>
+  <path d="M262 715 C281 744 298 774 315 814" fill="none" stroke="#5F351D" stroke-width="18" stroke-linecap="round"/>
+
+  <!-- feet -->
+  <g fill="#F2AD1B">
+    <path d="M335 822 C321 842 321 874 338 888 C352 900 362 879 370 862 C376 878 386 899 401 889 C420 877 417 845 402 824 Z"/>
+    <path d="M462 825 C448 845 448 875 465 889 C479 901 489 880 497 863 C503 879 514 899 529 889 C548 876 545 845 530 825 Z"/>
+  </g>
+
+  <!-- right wing behind document -->
+  <path d="M589 592 C631 575 675 588 699 623 C724 658 721 708 695 744 C675 770 652 784 626 786 C606 735 592 670 589 592 Z" fill="#744424"/>
+
+  <!-- report card -->
+  <g transform="rotate(5 725 640)">
+    <rect x="585" y="440" width="300" height="365" rx="20" fill="#FFFFFF" stroke="#2E8B68" stroke-width="18"/>
+
+    <!-- check -->
+    <circle cx="736" cy="555" r="72" fill="#3A9B77"/>
+    <path d="M700 557 L728 587 L780 528" fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- upward curve -->
+    <path d="M651 682 C699 680 741 662 792 619" fill="none" stroke="#2E8B68" stroke-width="15" stroke-linecap="round"/>
+    <path d="M779 617 L818 617 L804 653 Z" fill="#2E8B68"/>
+
+    <!-- bars -->
+    <rect x="654" y="704" width="48" height="54" rx="5" fill="#8FCDB3"/>
+    <rect x="716" y="688" width="48" height="70" rx="5" fill="#59B28F"/>
+    <rect x="778" y="666" width="48" height="92" rx="5" fill="#2E8B68"/>
+  </g>
+
+  <!-- achievement rays -->
+  <g fill="none" stroke="#2E8B68" stroke-width="18" stroke-linecap="round">
+    <path d="M790 341 L808 383"/>
+    <path d="M850 330 L846 378"/>
+    <path d="M907 367 L875 401"/>
+  </g>
+</svg>

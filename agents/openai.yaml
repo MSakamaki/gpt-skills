@@ -1,0 +1,13 @@
+interface:
+  display_name: 敵対的検証による回答の精度向上
+  short_description: 依頼項目の整理を行い、その内容を確認しつつ3回の敵対的検証で根拠ある高精度な回答を作成
+  default_prompt: $adversarial-answer を使い、依頼を整理して根拠を確認し、3回の敵対的検証を経た回答を作成してください。
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: false
