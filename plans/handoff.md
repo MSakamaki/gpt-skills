@@ -37,15 +37,18 @@
 複数 Skill を持てる構成になっている。`src/` 直下で `SKILL.md` を持つディレクトリが 1 つの Skill で、ディレクトリ名は `SKILL.md` の `name` と一致させる (不一致は検証エラー)。
 
 ```text
-adversarial-answer/                  ← リポジトリ名は最初の Skill 由来
+adversarial-answer/                  ← リポジトリ名は最初の Skill 由来。実態は複数 Skill
 ├── src/
-│   └── adversarial-answer/          Skill 本体。ZIP 化される唯一の範囲
+│   ├── adversarial-answer/          本書が対象とする Skill
+│   └── guided-clarification/        2026-09-16 にユーザーが追加。3 ファイル / 8.7KB
 ├── tools/      node 製の検証・ビルド・PDF 調査ツール (配布対象外)
 ├── docs/       フェーズ成果物 (配布対象外)
 ├── plans/      正本仕様と本書 (配布対象外)
 └── dist/
-    └── adversarial-answer/skill.zip (git 管理外)
+    └── <skill-name>/skill.zip       (git 管理外)
 ```
+
+**本書 (`handoff.md`) は `adversarial-answer` の引き継ぎであり、`guided-clarification` は対象外。** `guided-clarification` はユーザーが作成した独立の Skill で、`references/` を持たず `SKILL.md` 単体で完結している。`plans/` の正本仕様も `adversarial-answer` にのみ適用される。
 
 ```bash
 npm install

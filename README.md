@@ -1,8 +1,15 @@
-# adversarial-answer
+# GPT Skills
 
-依頼を 10 項目で確定し、想定される失敗モードに適した敵対的検証を 3 回行って回答を作る Skill。
+`src/` 直下で `SKILL.md` を持つディレクトリが 1 つの Skill になる。配布物は Skill ごとに `dist/<skill-name>/skill.zip`。`tools/` `docs/` `plans/` はパッケージに含まれない。
 
-配布物は `dist/<skill-name>/skill.zip`。`src/` は複数の Skill を持てるリポジトリで、`src/` 直下で `SKILL.md` を持つディレクトリが 1 つの Skill になる。`tools/` `docs/` `plans/` はパッケージに含まれない。
+## Skill 一覧
+
+| Skill | 内容 |
+|---|---|
+| [adversarial-answer](src/adversarial-answer/SKILL.md) | 依頼を 10 項目で確定し、想定される失敗モードに適した敵対的検証を 3 回行って回答を作る |
+| [guided-clarification](src/guided-clarification/SKILL.md) | 最終回答を実質的に変える確認だけを `0/1/2/3/9` の選択式で 1 問ずつ行ってから回答する |
+
+以下の `references/` に関する記述は `adversarial-answer` 固有で、すべての Skill に必要なものではない。
 
 ## 構成
 

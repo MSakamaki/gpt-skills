@@ -1,0 +1,10 @@
+interface:
+  display_name: 選択式確認で回答精度向上
+  short_description: 必要な確認だけを0/1/2/3/9形式で1問ずつ行い、回答精度を高める
+  default_prompt: $guided-clarification を使い、必要な確認だけを選択式で1問ずつ行ってから回答してください。
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  allow_implicit_invocation: false
