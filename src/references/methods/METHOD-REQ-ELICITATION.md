@@ -89,7 +89,7 @@ EXECUTABLE_METHOD
 ## Evidence
 
 - `PAPER-ELICITRON` — Ataei, Cheong, Grandi, Wang, Morris, Tessier: Elicitron: An LLM Agent-Based Simulation Framework for Design Requirements Elicitation (arXiv:2404.16045 / Autodesk Research 公開版)
-- 参照箇所: p.2 Fig.1 caption (エージェント生成と diversity sampling、Action / Observation / Challenge、agent interview、基準に基づく latent need の特定、レポート生成)
+- 参照箇所: PDF p.2 Fig.1 caption (エージェント生成と diversity sampling、Action / Observation / Challenge、agent interview、基準に基づく latent need の特定、レポート生成)
 - Local Path: references/papers/requirements/elicitron.pdf
 
 ## Evidence Strength

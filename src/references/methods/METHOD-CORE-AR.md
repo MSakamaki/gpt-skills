@@ -84,7 +84,7 @@ CORE_PROTOCOL
 ## Evidence
 
 - `PAPER-AR` — Adversarial Review: Structured Disagreement for Grounded Agentic Code Review (arXiv:2608.18167v1)
-- 参照箇所: p.1 Abstract (プロトコル構成と false-consensus failure mode)、p.4 §3.5 (内側ループ・外側ループ・内側反復上限 5・first-pass termination)、pp.5-6 (AGREE / DISAGREE EVIDENCE / DISAGREE CONCERN の 3 判定と Reviewer の応答規則)
+- 参照箇所: PDF p.1 Abstract (プロトコル構成と false-consensus failure mode)、PDF p.4 §3.5 (内側ループ・外側ループ・内側反復上限 5・first-pass termination)、PDF pp.5-6 (AGREE / DISAGREE EVIDENCE / DISAGREE CONCERN の 3 判定と Reviewer の応答規則)
 - Local Path: references/papers/core/adversarial-review-2608.18167.pdf
 
 ## Evidence Strength

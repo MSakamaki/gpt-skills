@@ -91,7 +91,7 @@ EXECUTABLE_METHOD
 ## Evidence
 
 - `PAPER-DEFEATERS` — Bloomfield, Netkachova, Rushby: Defeaters and Eliminative Argumentation in Assurance 2.0 (arXiv:2405.15800v1 / SRI-CSL-2024-01)
-- 参照箇所: p.2 Abstract (doubt を記録し、確認または反証する subcase へ展開する)、p.4 §1 Introduction (indefeasible confidence、doubt と defeater の区別、dismiss / sharpen、確証バイアスへの対抗、defeater の探索方法は本レポートの対象外であること)
+- 参照箇所: PDF p.2 Abstract (doubt を記録し、確認または反証する subcase へ展開する)、PDF p.4 (印刷 p.3) §1 Introduction (indefeasible confidence、doubt と defeater の区別、dismiss / sharpen、確証バイアスへの対抗、defeater の探索方法は本レポートの対象外であること)
 - Local Path: references/papers/assurance/defeaters-2405.15800.pdf
 
 ## Evidence Strength

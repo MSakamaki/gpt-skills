@@ -81,7 +81,7 @@ EXECUTABLE_METHOD
 ## Evidence
 
 - `PAPER-RDM` — R. J. Lempert: Robust Decision Making (RDM), Chapter 2 of *Decision Making under Deep Uncertainty* (DOI: 10.1007/978-3-030-05252-2_2)
-- 参照箇所: p.23 Abstract (予測ではなく deep uncertainty 下の意思決定、stress test、robust adaptive strategies)、pp.26-27 (plausible path 上での実行結果から戦略の脆弱性を特徴づけ、対応を評価する。順位付けではなくトレードオフを示す)
+- 参照箇所: PDF p.1 (印刷 p.23) Abstract (予測ではなく deep uncertainty 下の意思決定、stress test、robust adaptive strategies)、PDF pp.4-6 (印刷 pp.26-28) (plausible path 上での実行結果から戦略の脆弱性を特徴づけ、対応を評価する。順位付けではなくトレードオフを示す)
 - Local Path: references/papers/planning/robust-decision-making.pdf
 
 ## Evidence Strength
