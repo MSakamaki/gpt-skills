@@ -1,0 +1,62 @@
+name: check
+
+# `npm run check` (scan-secrets -> validate(strict) -> build -> verify-package) を
+# push と Pull Request のたびに走らせる。ローカルで実行し忘れても、
+# 検証を通らない変更が main に積まれないようにするため。
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      # `prepare` から install-hooks.mjs が走るが、CI では core.hooksPath を
+      # 設定するだけで副作用はない。git が無い環境でも exit 0 で抜ける。
+      - run: npm ci
+
+      # `.secrets-denylist` は git 管理外なので CI には存在しない。
+      # そのままだと組織固有語 (会社名・社内ホスト名など) の検査だけが効かない。
+      # リポジトリ Secret に `SECRETS_DENYLIST` を入れておくと復元して検査する。
+      # 未設定でも失敗させない — トークンと個人情報の検査は常に動くため。
+      - name: 組織固有語の denylist を復元
+        env:
+          SECRETS_DENYLIST: ${{ secrets.SECRETS_DENYLIST }}
+        run: |
+          if [ -n "$SECRETS_DENYLIST" ]; then
+            printf '%s\n' "$SECRETS_DENYLIST" > .secrets-denylist
+            echo "denylist を復元しました"
+          else
+            echo "::warning::SECRETS_DENYLIST が未設定です。組織固有語の検査はスキップされます"
+          fi
+
+      # 秘密情報スキャンのルール自体が発火するかを先に確認する。
+      # ルールが壊れていれば check が 0 件を返しても意味がないため。
+      - run: npm run scan:selftest
+
+      - run: npm run check
+
+      # ZIP は毎回同じバイト列になる (tools/build.mjs が全エントリの
+      # 日時を固定日時へ揃えている)。ハッシュを Job Summary に残し、
+      # リリース時に手元の値と突き合わせられるようにする。
+      - name: 成果物の SHA256 を記録
+        run: |
+          {
+            echo '## dist/<skill>/skill.zip'
+            echo
+            echo '```'
+            sha256sum dist/*/skill.zip
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
