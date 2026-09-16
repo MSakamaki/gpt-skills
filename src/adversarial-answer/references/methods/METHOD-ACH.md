@@ -93,7 +93,7 @@ EXECUTABLE_METHOD
 
 LIMITED。
 
-原典は ACH の有効性について一貫した支持を報告しておらず、mixed evidence とされる (plans2 §10)。本 Card は ACH を「除外による絞り込みの手続き」として採用するにとどめ、バイアス除去を保証する手法としては扱わない。
+原典は ACH の有効性について一貫した支持を報告しておらず、mixed evidence とされる。本 Card は ACH を「除外による絞り込みの手続き」として採用するにとどめ、バイアス除去を保証する手法としては扱わない。
 
 ## Domain Transfer
 

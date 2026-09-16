@@ -4,11 +4,13 @@
 
 `Bundled: YES` の PDF だけが配布 ZIP に含まれる。`Redistribution Allowed` が `NO` / `UNKNOWN-RESTRICTED` のものは同梱せず、取得元 URL だけを記録する。
 
-Retrieved Date はいずれも 2026-09-16。SHA256 と File Size は `node tools/hash.mjs` の出力と一致し、`node tools/validate.mjs` が毎回照合する。
+Retrieved Date はいずれも 2026-09-16。SHA256 と File Size は取得時に計算して記録したもの。
+
+**自動照合の対象は `Bundled: YES` のエントリだけ。** 同梱 PDF については、ビルドのたびに SHA256 と File Size を実体と照合している。`Bundled: NO` のエントリは実体が無いため照合できない。SHA256 を持つ非同梱エントリは `PAPER-ABP` / `PAPER-ADV-COLLAB` / `PAPER-FORECAST` の 3 件で、これらの値は取得時点の記録であり、以降は検証されていない。残る非同梱エントリは SHA256 を `-` としてある。
 
 ## 凡例
 
-- **Role** — `CORE_PROTOCOL` / `EXECUTABLE_METHOD` / `DESIGN_PRINCIPLE` (plans2 §18)
+- **Role** — `CORE_PROTOCOL` / `EXECUTABLE_METHOD` / `DESIGN_PRINCIPLE`
 - **Evidence Strength** — その文献が Method の有効性をどこまで裏付けるか。`STRONG` / `MODERATE` / `LIMITED` / `METHODOLOGICAL` (実証ではなく方法論記述)
 - **Transfer Risk** — 原論文の対象領域から本 Skill の一般回答へ転用する際の risk。`LOW` / `MEDIUM` / `HIGH`
 - **Required** — その Method を実行するために PDF が必須か。Method Card が実行仕様であるため、すべて `false`
@@ -39,7 +41,7 @@ Retrieved Date はいずれも 2026-09-16。SHA256 と File Size は `node tools
 - Required: false
 - Version: v1
 - Retrieved Date: 2026-09-16
-- Notes: v1 から同梱しているため継続する。一般的な回答精度の向上を実証した研究としては扱わない。採用するのは Main / Reviewer / Critic の分離、回答案の固定、根拠付き不同意、Consensus を成功条件としないこと、Review stabilization という構造のみ (plans2 §3)。
+- Notes: v1 から同梱しているため継続する。一般的な回答精度の向上を実証した研究としては扱わない。採用するのは Main / Reviewer / Critic の分離、回答案の固定、根拠付き不同意、Consensus を成功条件としないこと、Review stabilization という構造のみ。
 
 ## PAPER-MARE
 
@@ -65,7 +67,7 @@ Retrieved Date はいずれも 2026-09-16。SHA256 と File Size は `node tools
 - Required: false
 - Version: v1
 - Retrieved Date: 2026-09-16
-- Notes: MARE そのものを再現しない。「要件の生成と検証を同じ役割に担当させない」という工程分離の原則としてのみ利用する (plans2 §8)。
+- Notes: MARE そのものを再現しない。「要件の生成と検証を同じ役割に担当させない」という工程分離の原則としてのみ利用する。
 
 ## PAPER-ELICITRON
 
@@ -91,7 +93,7 @@ Retrieved Date はいずれも 2026-09-16。SHA256 と File Size は `node tools
 - Required: false
 - Version: Autodesk Research 公開版 (2024-11 掲載)
 - Retrieved Date: 2026-09-16
-- Notes: 生成したペルソナ由来の要求は `CANDIDATE_REQUIREMENT` として扱い、`CONFIRMED_REQUIREMENT` としない (plans2 §7)。同内容は arXiv:2404.16045 としても公開されているが、plans2 §7 が示す Autodesk Research 公開版を取得した。PDF に再配布条件の記載がないため License は UNKNOWN。著者 6 名は arXiv 版・同梱 PDF の双方で一致を確認済み。
+- Notes: 生成したペルソナ由来の要求は `CANDIDATE_REQUIREMENT` として扱い、`CONFIRMED_REQUIREMENT` としない。同内容は arXiv:2404.16045 としても公開されているが、Autodesk Research 公開版を取得した。PDF に再配布条件の記載がないため License は UNKNOWN。著者 6 名は arXiv 版・同梱 PDF の双方で一致を確認済み。
 
 ## PAPER-DEFEATERS
 
@@ -169,7 +171,7 @@ Retrieved Date はいずれも 2026-09-16。SHA256 と File Size は `node tools
 - Required: false
 - Version: v1
 - Retrieved Date: 2026-09-16
-- Notes: RE classification での実現可能性評価にとどまるため、あらゆる要件整理タスクへの有効性を示した研究としては扱わない (plans2 §15)。
+- Notes: RE classification での実現可能性評価にとどまるため、あらゆる要件整理タスクへの有効性を示した研究としては扱わない。
 
 ---
 
@@ -201,7 +203,7 @@ Retrieved Date はいずれも 2026-09-16。SHA256 と File Size は `node tools
 - Required: false
 - Version: MR-114 (2005 年公開 PDF)
 - Retrieved Date: 2026-09-16
-- Notes: 無償で閲覧・ダウンロードできるが、RAND が明示的に再配布を制限しているため同梱しない。PDF は暗号化されており本文抽出も不可。Method Card は Landing Page の記述と plans2 §12 に基づき、原典の細部に踏み込まない範囲で記述する。
+- Notes: 無償で閲覧・ダウンロードできるが、RAND が明示的に再配布を制限しているため同梱しない。PDF は暗号化されており本文抽出も不可。Method Card は Landing Page の記述に基づき、原典の細部に踏み込まない範囲で記述する。
 
 ## PAPER-PREMORTEM
 
@@ -227,7 +229,7 @@ Retrieved Date はいずれも 2026-09-16。SHA256 と File Size は `node tools
 - Required: false
 - Version: J. Behav. Decis. Mak. 2(1), 25-38
 - Retrieved Date: 2026-09-16 (取得試行のみ)
-- Notes: **P0 の不足**。prospective hindsight を「未来の出来事が既に起きたものとして説明させる」方法として扱う点のみを plans2 §11 経由で採用する。原典未取得のため、実験条件・効果量に関する主張を Method Card へ書かない。別論文への置換は行わない。
+- Notes: **P0 の不足**。prospective hindsight を「未来の出来事が既に起きたものとして説明させる」方法として扱う点のみを採用する。原典未取得のため、実験条件・効果量に関する主張を Method Card へ書かない。別論文への置換は行わない。
 
 ## PAPER-ACH
 
@@ -253,7 +255,7 @@ Retrieved Date はいずれも 2026-09-16。SHA256 と File Size は `node tools
 - Required: false
 - Version: Appl. Cogn. Psychol. 33(6)
 - Retrieved Date: 2026-09-16 (取得試行のみ)
-- Notes: ACH の有効性については mixed evidence が報告されており、`ACH = guaranteed debiasing` として扱わない (plans2 §10)。
+- Notes: ACH の有効性については mixed evidence が報告されており、`ACH = guaranteed debiasing` として扱わない。
 
 ## PAPER-COTO
 
@@ -331,7 +333,7 @@ Retrieved Date はいずれも 2026-09-16。SHA256 と File Size は `node tools
 - Required: false
 - Version: Advance online publication (2024-08-15)
 - Retrieved Date: 2026-09-16
-- Notes: 著者サイトから無償取得できるが、実体は APA の出版版であり再配布条件を満たさないため同梱しない。単一モデルが双方を演じる場合、独立した研究参加者による Adversarial Collaboration の再現とは主張しない (plans2 §16)。
+- Notes: 著者サイトから無償取得できるが、実体は APA の出版版であり再配布条件を満たさないため同梱しない。単一モデルが双方を演じる場合、独立した研究参加者による Adversarial Collaboration の再現とは主張しない。
 
 ## PAPER-FORECAST
 

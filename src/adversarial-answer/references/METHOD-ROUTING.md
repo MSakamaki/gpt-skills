@@ -91,12 +91,12 @@ Method 選択では `CRITICAL` → `MAJOR` の順に Coverage する。`MINOR` �
 | Failure Mode | 第一候補 | 次候補 | 担当する原則 |
 |---|---|---|---|
 | `F01` ASSUMPTION | `ASSUMPTION_BASED_PLANNING` | `SOCRATIC` | — |
-| `F02` CONFIRMATION | `CONSIDER_OPPOSITE` | `COMPETING_HYPOTHESES` | — |
+| `F02` CONFIRMATION | `CONSIDER_OPPOSITE` | `COMPETING_HYPOTHESES` | `ADVERSARIAL_COLLABORATION` (Profile に `CONFLICT` を含む場合) |
 | `F03` ALTERNATIVE | `COMPETING_HYPOTHESES` (説明仮説) | `CONSIDER_OPPOSITE` (結論・案) | — |
 | `F04` FAILURE | `PREMORTEM` | — | — |
 | `F05` FUTURE | `ROBUST_DECISION_MAKING` (変数 2 つ以上) | `ASSUMPTION_BASED_PLANNING` (前提単位) | — |
-| `F06` PERSPECTIVE | `REQUIREMENTS_ELICITATION` | — | `MARE_PROCESS_SEPARATION` |
-| `F07` CONSENSUS | — (CORE-AR が担当) | `CONSIDER_OPPOSITE` | `INDEPENDENT_FIRST` / `MINORITY_DISSENT` |
+| `F06` PERSPECTIVE | `REQUIREMENTS_ELICITATION` | — | `MARE_PROCESS_SEPARATION` / `REQUIREMENTS_MAD` |
+| `F07` CONSENSUS | — (CORE-AR が担当) | `CONSIDER_OPPOSITE` | `INDEPENDENT_FIRST` / `MINORITY_DISSENT` / `ADVERSARIAL_COLLABORATION` / `REQUIREMENTS_MAD` |
 | `F08` EVIDENCE | `DEFEATER` (※) | `COMPETING_HYPOTHESES` | — |
 | `F09` DEFEATER | `DEFEATER` | — | — |
 | `F10` UNCERTAINTY | `ROBUST_DECISION_MAKING` | — | `FORECAST_CALIBRATION` |
@@ -106,6 +106,14 @@ Method 選択では `CRITICAL` → `MAJOR` の順に Coverage する。`MINOR` �
 | `F14` CONSTRAINT | `PREMORTEM` | `ASSUMPTION_BASED_PLANNING` / `ROBUST_DECISION_MAKING` / `REQUIREMENTS_ELICITATION` | — |
 | `F15` CAUSALITY | `COMPETING_HYPOTHESES` | `SOCRATIC` | — |
 | `F16` OVERCORRECTION | — (Invariant Gate G7 が担当) | `DEFEATER` | — |
+
+### 担当する原則の読み方
+
+この列は Method 候補ではない。その Failure Mode を検出したとき、`references/DESIGN-PRINCIPLES.md` のどの原則が併せてかかるかを示す。原則は Round へ割り当てず、選択した Method の実行のしかたを縛る。
+
+- `REQUIREMENTS_MAD` がかかるのは `REQUIREMENTS_ELICITATION` を実行する Round に限る。`F06` / `F07` を検出しても、この Method を選ばなかった場合は適用しない
+- `ADVERSARIAL_COLLABORATION` がかかるのは Problem Profile に `CONFLICT` が含まれる場合に限る。`F02` / `F07` の検出だけでは発火しない
+- `INDEPENDENT_FIRST` / `MINORITY_DISSENT` は `F07` の有無に関わらず全 Round にかかる。実行時の規則は `SKILL.md` §6 が正本で、この列は原則側の記述への案内にすぎない
 
 ### ※ F08 EVIDENCE の扱い
 
@@ -131,7 +139,7 @@ Method 選択では `CRITICAL` → `MAJOR` の順に Coverage する。`MINOR` �
 - `Do Not Use When` に 1 つでも該当する候補は落とす
 - 判定に必要な情報が回答仕様に無い場合、その Method は「適用条件を確認できない」として落とす。推測で適用しない
 
-特に誤用しやすい境界を明示する。
+特に誤用しやすい境界を明示する。**この表は要約であり、適用境界の正本は各 Method Card の `Applicable When` / `Do Not Use When`。** 食い違った場合は Card を採り、この表を直す。
 
 | 境界 | 判定の分かれ目 |
 |---|---|
@@ -156,6 +164,19 @@ Method 選択では `CRITICAL` → `MAJOR` の順に Coverage する。`MINOR` �
 6. 適用可能な専門 Method が 1 つも無い場合は CORE-AR だけで進む。
 
 **数値スコアは使わない。** 重み付けの根拠が無い以上、点数化は新しい恣意性を作るだけであるため。
+
+### Covers に無い Method を当てる場合
+
+手順 2 の第 1 基準 (`Covers` に持つ) を満たす Method が 1 つも無い Failure Mode がある。`F13 CRITERIA` がそれにあたる。
+
+この場合、**その Failure Mode の一部分を検査できると Method Card が明示している Method** を次候補として選んでよい。ただし次を守る。
+
+- **Primary は `Covers` に持つ Method を優先する。** 他の Failure Mode を `Covers` に持つ適用可能 Method が選択集合にあるなら、そちらを Primary とし、この例外で選んだ Method は次候補に置く
+- `Covers` に持つ適用可能 Method が 1 つも無い場合に限り、この例外で選んだ Method を Primary にしてよい。CORE-AR だけで進むより、部分的にでも検査できる Method を当てる方を採る
+- Cover が部分的であることを §10 の記録へ残す。未 Coverage の扱いは変えない
+- §5 の適用条件評価は通常どおり通す。この例外は特化の判定を緩めるだけで、`Do Not Use When` を免除しない
+
+`F13` に `SOCRATIC` を当てるのはこの規則による (§4「F13 に専任 Method がないこと」)。個別ケースを通すための例外を新たに足さない。
 
 ### 最大 3 は上限であり目標ではない
 
@@ -204,7 +225,7 @@ Method-specific Attack  +  Invariant Gate
 
 Method が 3 つに満たない Round では、CORE-AR の一般攻撃を行う。その際も Round ごとに観点を変え、同じ批判の言い換えを繰り返さない。
 
-Invariant Gate (`SKILL.md` の G1〜G7) は **すべての Round で必ず実施する。** 専門 Method が Gate を置き換えることはない。
+Invariant Gate は **すべての Round で必ず実施する。** 専門 Method が Gate を置き換えることはない。**G1〜G7 の定義は `SKILL.md` §6 が正本**で、本書と `DESIGN-PRINCIPLES.md` は参照するだけ。
 
 ---
 

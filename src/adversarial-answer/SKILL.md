@@ -1,6 +1,6 @@
 ---
 name: adversarial-answer
-description: ユーザーの依頼を10項目で明示的に確定し、確認質問、根拠調査、想定される失敗モードに応じた3回の敵対的検証を経て、根拠付きの高精度な最終回答を作る。ユーザーが adversarial-answer を明示的に指定した場合、または要件整理、反復的な確認、根拠確認、敵対的検証、反例検討、3回の検証要約を伴う厳密な回答を求めた場合に使用する。この複数ターンの手順が過剰となる日常的な質問には、明示指定がない限り使用しない。
+description: ユーザーの依頼を10項目で明示的に確定し、確認質問、根拠調査、想定される失敗モードに応じた3回の敵対的検証を経て、根拠付きの高精度な最終回答を作る。ユーザーがこのSkillを明示的に起動して、要件整理、反復的な確認、根拠確認、敵対的検証、反例検討、3回の検証要約を伴う厳密な回答を求めた場合に使用する。明示的な起動がない限り、この手順が有効に見える依頼でも使用しない。複数ターンにわたる手順のため、日常的な質問には向かない。
 ---
 
 # 敵対的検証回答
@@ -99,7 +99,13 @@ description: ユーザーの依頼を10項目で明示的に確定し、確認�
 9. **必要な場合だけ対応PDFを確認する** — Method Cardの記述に疑義がある場合に限る。同梱されていないPDFをウェブから取得しない。
 10. **3回のReview RoundへMethodを割り当てる** — Round 1にPrimary、以降を順に割り当てる。Methodが3つに満たないRoundは`CORE-AR`の一般攻撃とする。
 
-問題プロファイルに`CONFLICT` `FORECAST` `UNCERTAINTY`が含まれる場合、または要件・原因・対策を生成した役割にそのまま検証させそうな場合は、`references/DESIGN-PRINCIPLES.md`も読み、該当する原則を検証工程へ反映する。これらの原則はReview Roundとして割り当てない。
+次のいずれかに当たる場合は、`references/DESIGN-PRINCIPLES.md`も読み、該当する原則を検証工程へ反映する。これらの原則はReview Roundとして割り当てない。
+
+- 問題プロファイルに`CONFLICT` `FORECAST` `UNCERTAINTY`が含まれる
+- 手順6で`REQUIREMENTS_ELICITATION`を選んだ (`REQUIREMENTS_MAD`がその Round にかかる)
+- 要件・原因・対策を生成した役割にそのまま検証させそうである
+
+`INDEPENDENT_FIRST`と`MINORITY_DISSENT`は上の条件に関わらず全Roundにかかるが、**実行時の規則は本書§6が正本**であり、`DESIGN-PRINCIPLES.md`を読まない場合も§6の記述だけで足りる。`DESIGN-PRINCIPLES.md`側はその2原則の根拠と`Check`を持つ。
 
 ### 共通プロトコル CORE-AR
 

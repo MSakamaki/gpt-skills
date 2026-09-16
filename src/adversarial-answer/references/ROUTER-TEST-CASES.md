@@ -12,6 +12,8 @@
 
 `allowed_methods` は「選ばれてよい Method」であり、全部選べという意味ではない。`CORE-AR` は常に動作するため各ケースに記載しない。
 
+`expected_design_principles` には、Method の選択結果に依らずかかる原則だけを書く。`REQUIREMENTS_MAD` のように特定の Method を選んだ Round にだけかかる原則は、その Method が `required_methods` にある場合に限って記載する。`allowed_methods` 止まりのケース (REQ-001 / CONF-001 / GEN-003) では、その Method を選んだときだけ原則がかかる。`INDEPENDENT_FIRST` / `MINORITY_DISSENT` は全 Round に常時かかるため記載しない。
+
 `FAIL` が出た場合、テストケースではなく Method Card または Routing Rule を修正する。修正後は全ケースを再確認する。**個別ケースを通すためだけの例外規則を足さない。**
 
 ---
@@ -664,6 +666,25 @@ reason: >
 
 36 ケース中、初回評価で 3 件 FAIL。原因は 1 つで、Routing Rule と Method Card を修正して全件 PASS。
 
+### 再評価 — ドキュメント監査の是正後 (2026-09-16)
+
+ドキュメント監査の是正で `METHOD-ROUTING.md` と `SKILL.md` を変更したため、影響範囲を再確認した。**判定に変更はなく、36 件すべて PASS のまま。**
+
+| 変更 | Route への影響 |
+|---|---|
+| D-04 — §4 の「担当する原則」列へ `REQUIREMENTS_MAD` / `ADVERSARIAL_COLLABORATION` を追記 | なし。原則は Method 候補ではなく、`required_methods` / `allowed_methods` / `forbidden_primary` の判定に入らない。全 36 件の `expected_design_principles` と照合し、矛盾が無いことを確認した |
+| D-05 — `SKILL.md` の `DESIGN-PRINCIPLES.md` 読み込み条件へ `REQUIREMENTS_ELICITATION` 選択時を追加 | なし。読み込みの要否が変わるだけで Method 選択は変わらない |
+| D-06 — §6 へ `Covers` 外の Method を次候補として選べる例外を明記 | `F13` を含む DEC-002 / CONF-003 / GEN-003 / BND-003 の 4 件が対象。いずれも PASS のまま |
+
+D-06 の影響を受ける 4 件の確認。
+
+- **DEC-002** (`F13`, `F02`) — `F02` を `Covers` に持つ `CONSIDER_OPPOSITE` が適用可能なため、そちらが Primary、`SOCRATIC` は `F13` に対する次候補。`required_methods` の `SOCRATIC` は選択集合に入っており、`forbidden_primary` にも触れない
+- **CONF-003** (`F02`, `F03`, `F13`) — Primary は `CONSIDER_OPPOSITE` で変わらない
+- **GEN-003** (`F11`, `F12`, `F13`) — `SOCRATIC` は `F11` / `F12` を `Covers` に持つため、例外規則を使わずに Primary になる
+- **BND-003** (`F02`, `F03`, `F13`) — Primary は `CONSIDER_OPPOSITE` で変わらない
+
+規則を「`Covers` に持つ Method を Primary に優先する」としたのは、`F13` だけが立つ依頼で Primary を置けなくなるのを避けるため。その場合に限り例外側の Method を Primary にしてよい。
+
 ### 修正 1 — DEFEATER の過剰適用
 
 **現象**: FACT-001 / FACT-002 / BND-005 で、`F08 EVIDENCE` を検出すると `METHOD-ROUTING.md` §4 の表が DEFEATER を第一候補として返し、DEFEATER の `Applicable When` の 3 つ目 (「回答案の中心的な主張が、限られた根拠の上に立っている」) が緩いため除外されなかった。結果として、出典と突き合わせれば決着する単純な事実確認や、対象を指定しない一般的なレビュー依頼にも DEFEATER が Primary として選ばれた。
@@ -692,20 +713,76 @@ FACT-001 / FACT-002 は Card の `Do Not Use When` で、BND-005 は条件 3 を
 
 ## Method 別カバレッジ
 
+件数は 36 ケースの `allowed_methods` / `forbidden_primary` から機械的に決まる。定義は次のとおりで、集計し直せば必ず同じ数になる。
+
+- **Positive** — `allowed_methods` に含まれ、`forbidden_primary` に含まれない。選択集合へ入ってよいケース
+- **Negative** — `forbidden_primary` に含まれる。Primary として選んではならないケース
+- **Boundary** — `reason` に境界テストと明記されたケース、または `BND-*` のうち、その Method が Positive か Negative のいずれかに当たるもの
+
+Positive と Negative は定義上排他になる。`allowed_methods` と `forbidden_primary` の両方に現れる Method (補助としては許すが Primary にはしない) は Negative として数える。
+
 | Method | Positive | Negative | Boundary |
 |---|---|---|---|
-| SOCRATIC | 8 (REQ-001, REQ-002, DEC-002, CONF-003, FACT-003, GEN-001, GEN-003, BND-005) | 4 (REQ-003, ASSR-001, GEN-002, CAUSE-001*) | 3 (REQ-002, REQ-003, DEC-002) |
-| REQUIREMENTS_ELICITATION | 4 (REQ-001, REQ-003, CONF-001, GEN-003) | 5 (REQ-002, UNC-002, FCST-002, ASSR-003, BND-006) | 2 (REQ-002, REQ-003) |
-| CONSIDER_OPPOSITE | 8 (DEC-001, DEC-003, CAUSE-002, CONF-001, CONF-003, ASSR-001, FCST-001, FCST-003, BND-003) | 3 (BND-004, FACT-002, GEN-002) | 3 (DEC-001, BND-003, CONF-001) |
-| COMPETING_HYPOTHESES | 4 (CAUSE-001, CAUSE-002, CAUSE-003, BND-004) | 20 以上 | 4 (DEC-001, BND-003, BND-004, FACT-003) |
-| PREMORTEM | 7 (PLAN-001, PLAN-002, PLAN-003, UNC-003, ASSR-003, BND-001, BND-002, DEC-003) | 14 | 5 (PLAN-002, PLAN-003, UNC-003, BND-001, BND-002) |
-| ASSUMPTION_BASED_PLANNING | 9 (PLAN-001, PLAN-003, UNC-001, UNC-002, ASSR-003, FCST-002, BND-001, BND-002, BND-003, BND-006) | 4 (CAUSE-002, FCST-003, GEN-001, GEN-002) | 4 (PLAN-003, BND-001, BND-002, UNC-003) |
-| ROBUST_DECISION_MAKING | 5 (UNC-001, UNC-002, FCST-002, PLAN-003, BND-006) | 12 | 4 (PLAN-002, UNC-003, FCST-001, BND-006) |
-| DEFEATER | 6 (ASSR-001, ASSR-002, ASSR-003, CONF-002, CAUSE-003, FCST-001, FCST-003) | 7 (PLAN-001, CONF-003, FACT-001, FACT-002, FACT-003, GEN-001, GEN-002, BND-005) | 3 (BND-005, FACT-001, CONF-002) |
+| SOCRATIC | 13 | 4 | 8 |
+| REQUIREMENTS_ELICITATION | 4 | 10 | 6 |
+| CONSIDER_OPPOSITE | 11 | 5 | 7 |
+| COMPETING_HYPOTHESES | 4 | 30 | 17 |
+| PREMORTEM | 7 | 27 | 17 |
+| ASSUMPTION_BASED_PLANNING | 12 | 7 | 11 |
+| ROBUST_DECISION_MAKING | 5 | 23 | 12 |
+| DEFEATER | 7 | 11 | 6 |
 
-`*` CAUSE-001 の `forbidden_primary` には SOCRATIC を含めていないが、`allowed_methods` において Primary ではなく補助として許容している。Negative の要件は「Primary として選ばれてはならない」ケースで数えている。
+すべての Method で Positive >= 3、Negative >= 3、Boundary >= 2 を満たす (最小は Positive 4、Negative 4、Boundary 6)。
 
-すべての Method で Positive >= 3、Negative >= 3、Boundary >= 2 を満たす。
+### 内訳
+
+**SOCRATIC**
+
+- Positive (13) — REQ-001, REQ-002, DEC-002, CAUSE-001, CAUSE-003, CONF-003, ASSR-002, FACT-003, GEN-001, GEN-003, BND-003, BND-004, BND-005
+- Negative (4) — REQ-003, UNC-001, ASSR-001, GEN-002
+- Boundary (8) — REQ-002, REQ-003, UNC-001, ASSR-001, FACT-003, BND-003, BND-004, BND-005
+
+**REQUIREMENTS_ELICITATION**
+
+- Positive (4) — REQ-001, REQ-003, CONF-001, GEN-003
+- Negative (10) — REQ-002, CAUSE-002, PLAN-001, UNC-002, CONF-002, ASSR-001, ASSR-003, FCST-002, GEN-002, BND-006
+- Boundary (6) — REQ-002, REQ-003, CAUSE-002, CONF-001, ASSR-001, BND-006
+
+**CONSIDER_OPPOSITE**
+
+- Positive (11) — DEC-001, DEC-002, DEC-003, CAUSE-002, CONF-001, CONF-002, CONF-003, ASSR-001, FCST-001, FCST-003, BND-003
+- Negative (5) — CAUSE-001, PLAN-002, FACT-002, GEN-002, BND-004
+- Boundary (7) — DEC-001, CAUSE-002, PLAN-002, CONF-001, ASSR-001, BND-003, BND-004
+
+**COMPETING_HYPOTHESES**
+
+- Positive (4) — CAUSE-001, CAUSE-002, CAUSE-003, BND-004
+- Negative (30) — REQ-001, REQ-003, DEC-001, DEC-002, DEC-003, PLAN-001, PLAN-002, PLAN-003, UNC-001, UNC-002, UNC-003, CONF-001, CONF-002, CONF-003, ASSR-001, ASSR-002, ASSR-003, FCST-001, FCST-002, FACT-001, FACT-002, FACT-003, GEN-001, GEN-002, GEN-003, BND-001, BND-002, BND-003, BND-005, BND-006
+- Boundary (17) — REQ-003, DEC-001, CAUSE-002, PLAN-002, PLAN-003, UNC-001, UNC-003, CONF-001, ASSR-001, FACT-001, FACT-003, BND-001, BND-002, BND-003, BND-004, BND-005, BND-006
+
+**PREMORTEM**
+
+- Positive (7) — DEC-003, PLAN-001, PLAN-002, UNC-003, ASSR-003, BND-002, BND-006
+- Negative (27) — REQ-001, REQ-002, DEC-001, DEC-002, CAUSE-001, CAUSE-002, CAUSE-003, PLAN-003, UNC-001, UNC-002, CONF-001, CONF-003, ASSR-001, ASSR-002, FCST-001, FCST-002, FCST-003, FACT-001, FACT-002, FACT-003, GEN-001, GEN-002, GEN-003, BND-001, BND-003, BND-004, BND-005
+- Boundary (17) — REQ-002, DEC-001, CAUSE-002, PLAN-002, PLAN-003, UNC-001, UNC-003, CONF-001, ASSR-001, FACT-001, FACT-003, BND-001, BND-002, BND-003, BND-004, BND-005, BND-006
+
+**ASSUMPTION_BASED_PLANNING**
+
+- Positive (12) — DEC-001, PLAN-001, PLAN-002, PLAN-003, UNC-001, UNC-002, UNC-003, ASSR-003, FCST-002, BND-001, BND-003, BND-006
+- Negative (7) — CAUSE-001, CAUSE-002, FCST-003, FACT-001, GEN-001, GEN-002, BND-002
+- Boundary (11) — DEC-001, CAUSE-002, PLAN-002, PLAN-003, UNC-001, UNC-003, FACT-001, BND-001, BND-002, BND-003, BND-006
+
+**ROBUST_DECISION_MAKING**
+
+- Positive (5) — PLAN-003, UNC-001, UNC-002, FCST-002, BND-006
+- Negative (23) — REQ-001, REQ-003, DEC-002, DEC-003, CAUSE-001, CAUSE-003, PLAN-002, UNC-003, CONF-001, CONF-002, ASSR-002, ASSR-003, FCST-001, FCST-003, FACT-001, FACT-002, GEN-001, GEN-002, GEN-003, BND-001, BND-002, BND-004, BND-005
+- Boundary (12) — REQ-003, PLAN-002, PLAN-003, UNC-001, UNC-003, CONF-001, FACT-001, BND-001, BND-002, BND-004, BND-005, BND-006
+
+**DEFEATER**
+
+- Positive (7) — CAUSE-003, CONF-002, ASSR-001, ASSR-002, ASSR-003, FCST-001, FCST-003
+- Negative (11) — REQ-002, PLAN-001, CONF-003, FACT-001, FACT-002, FACT-003, GEN-001, GEN-002, GEN-003, BND-005, BND-006
+- Boundary (6) — REQ-002, ASSR-001, FACT-001, FACT-003, BND-005, BND-006
 
 ---
 
