@@ -10,6 +10,21 @@
 
 ---
 
+## 2026-09-16 — リポジトリルート移動とメンテナンス文書の整備 (対象コミット `c006bab` 時点)
+
+### 変わった点
+
+- **リポジトリルートを移動** — `D:\gpt-skills\adversarial-answer` → `D:\gpt-skills`。Skill 本体・ツール・検証内容は変更なし。`npm run check` は 0 error / 0 warn、`dist/adversarial-answer/skill.zip` の sha256 も `5771f3ef…` のまま変わっていない
+- **`CLAUDE.md` を新規作成** — Skill の追加・編集手順、`npm run check` の位置づけ、編集禁止ファイル、ビルド再現性、環境上の落とし穴をまとめた。本書 §3 の決定事項と §9 の注意点への入口になっている
+- **`README.md` を改稿** — 単一 Skill 前提の記述を外し、リポジトリ全体の構成図と Skill 1 つ分の構成図を分離。`references/` が `adversarial-answer` 固有である旨の重複記述を整理した
+- **旧ルート名を参照していた箇所を修正** — 本書 §2 の構成図、§7 の `cd` パス、`src/references/…` 表記、`docs/PHASE2-PLAN.md` の後日注記
+
+### 移してきた項目
+
+なし (残作業・課題・決定事項に変更はない)
+
+---
+
 ## 2026-09-16 — 初版 (対象コミット `11f8e09`)
 
 `plans/phase.md` の Phase 1〜8 完了を受けて作成。

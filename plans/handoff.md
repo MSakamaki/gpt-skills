@@ -1,6 +1,6 @@
 # adversarial-answer v2 — 引き継ぎ
 
-最終更新: 2026-09-16 / 対象コミット: `11f8e09`
+最終更新: 2026-09-16 / 対象コミット: `c006bab`
 
 改訂履歴は [handoff-history.md](handoff-history.md) に分離している。本書は常に「現在の状態と次にやること」だけを書き、過去の経緯は履歴側へ移す。
 
@@ -19,7 +19,7 @@
 | 5 | SKILL.md 統合 | 完了 |
 | 6 | Router Regression | 完了 (36 ケース全 PASS) |
 | 7 | A/B と敵対的検証 | 完了 → [docs/PHASE7-AB.md](../docs/PHASE7-AB.md) |
-| 8 | 最終検証と Package | 完了 (`dist/skill.zip` 3.40MB) |
+| 8 | 最終検証と Package | 完了 (`dist/adversarial-answer/skill.zip` 3.40MB) |
 
 **未検証なのは本番環境 (ChatGPT) での動作だけ。** それ以外は机上・ローカルで確認済み。
 
@@ -27,8 +27,8 @@
 
 - `npm run check` = 0 error / 0 warn
 - Router Regression 36 ケース全 PASS、CRITICAL な誤 Route 0、Forbidden Primary 違反 0
-- `dist/skill.zip` sha256 `5771f3efdd52bd0193cb71c8bec2c7f748ff62b97e5759d879ee79b32ef31cca` (ビルドは再現性あり)
-- git 9 コミット。baseline `6e2a38b` (v1 as-is)、HEAD `11f8e09`。**remote 未設定**
+- `dist/adversarial-answer/skill.zip` sha256 `5771f3efdd52bd0193cb71c8bec2c7f748ff62b97e5759d879ee79b32ef31cca` (ビルドは再現性あり)
+- git 12 コミット。baseline `6e2a38b` (v1 as-is)、HEAD `c006bab`。**remote 未設定**
 
 ---
 
@@ -37,13 +37,15 @@
 複数 Skill を持てる構成になっている。`src/` 直下で `SKILL.md` を持つディレクトリが 1 つの Skill で、ディレクトリ名は `SKILL.md` の `name` と一致させる (不一致は検証エラー)。
 
 ```text
-adversarial-answer/                  ← リポジトリ名は最初の Skill 由来。実態は複数 Skill
+gpt-skills/                          ← リポジトリルート (D:\gpt-skills)
 ├── src/
 │   ├── adversarial-answer/          本書が対象とする Skill
 │   └── guided-clarification/        2026-09-16 にユーザーが追加。3 ファイル / 8.7KB
 ├── tools/      node 製の検証・ビルド・PDF 調査ツール (配布対象外)
 ├── docs/       フェーズ成果物 (配布対象外)
 ├── plans/      正本仕様と本書 (配布対象外)
+├── README.md   リポジトリ全体の説明
+├── CLAUDE.md   メンテナンス手順 (Claude Code 向け)
 └── dist/
     └── <skill-name>/skill.zip       (git 管理外)
 ```
@@ -88,7 +90,7 @@ node tools/pdftext.mjs <file.pdf> 1 3     # 指定ページのテキスト
 
 ### R1. 本番環境での動作確認 (最優先・未着手)
 
-`dist/skill.zip` を ChatGPT へ上げ、実際に走らせる。確認するのは次の 3 点。
+`dist/adversarial-answer/skill.zip` を ChatGPT へ上げ、実際に走らせる。確認するのは次の 3 点。
 
 1. Progressive Loading が動くか — `SKILL.md` から `references/METHOD-ROUTING.md` と Method Card が追加読み込みされるか
 2. 読み込み量が実運用で収まるか — 固定約 35KB + Method Card 1〜3 枚 (各約 5〜7KB)
@@ -96,7 +98,7 @@ node tools/pdftext.mjs <file.pdf> 1 3     # 指定ページのテキスト
 
 ここが崩れると Router 設計の前提そのものが崩れる。**他の改善より先にやる。**
 
-テスト入力は `src/references/ROUTER-TEST-CASES.md` から代表 5〜6 件を選ぶとよい。境界ケース (BND-001 / BND-002 / BND-003 / BND-004) は Route の正誤が判定しやすい。
+テスト入力は `src/adversarial-answer/references/ROUTER-TEST-CASES.md` から代表 5〜6 件を選ぶとよい。境界ケース (BND-001 / BND-002 / BND-003 / BND-004) は Route の正誤が判定しやすい。
 
 ### R2. git remote 未設定
 
@@ -149,15 +151,15 @@ ACH / Considering-the-Opposite / Socratic は原典を取得できていない�
 ## 7. 再開手順
 
 ```bash
-cd D:\gpt-skills\adversarial-answer
+cd D:\gpt-skills
 npm install          # node_modules は git 管理外
 npm run check        # 0 error / 0 warn になることを確認
-git log --oneline    # 9 コミット、HEAD = 11f8e09
+git log --oneline    # 12 コミット、HEAD = c006bab
 ```
 
 そのうえで本書 §4 と §6 を読み、着手対象をユーザーと決める。
 
-読む順序は `plans/handoff.md` (本書) → `docs/PHASE2-PLAN.md` (構成と Method 一覧) → `src/references/METHOD-ROUTING.md` (Router 仕様)。`plans/plans2.md` は正本だが 1,740 行あるため、疑義が出た箇所だけ参照する。
+読む順序は `CLAUDE.md` (リポジトリの約束事) → `plans/handoff.md` (本書) → `docs/PHASE2-PLAN.md` (構成と Method 一覧) → `src/adversarial-answer/references/METHOD-ROUTING.md` (Router 仕様)。`plans/plans2.md` は正本だが 1,740 行あるため、疑義が出た箇所だけ参照する。
 
 ---
 

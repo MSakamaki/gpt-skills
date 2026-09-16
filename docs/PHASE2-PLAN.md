@@ -6,7 +6,7 @@
 
 ## 1. 最終ファイル構成
 
-> **後日の変更**: Phase 8 完了後、`src/` 直下を複数 Skill 対応にした。以下の `src/` は現在 `src/adversarial-answer/` に、成果物 `dist/skill.zip` は `dist/adversarial-answer/skill.zip` に相当する。現行の構成は [../plans/handoff.md](../plans/handoff.md) §2 と [../README.md](../README.md) を参照。Skill の中身と ZIP のバイト列は変わっていない。
+> **後日の変更**: Phase 8 完了後、`src/` 直下を複数 Skill 対応にした。以下の `src/` は現在 `src/adversarial-answer/` に、成果物 `dist/skill.zip` は `dist/adversarial-answer/skill.zip` に相当する。現行の構成は [../plans/handoff.md](../plans/handoff.md) §2 と [../README.md](../README.md) を参照。Skill の中身と ZIP のバイト列は変わっていない。またリポジトリルート自体を `D:\gpt-skills` へ移したため、以下のルート名 `adversarial-answer/` は現在 `gpt-skills/` にあたる。
 
 ```text
 adversarial-answer/                 リポジトリルート (git 管理)
