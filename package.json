@@ -12,5 +12,8 @@
   },
   "dependencies": {
     "jszip": "^3.10.1"
+  },
+  "devDependencies": {
+    "pdfjs-dist": "^6.3.289"
   }
 }
