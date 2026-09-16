@@ -1,0 +1,16 @@
+{
+  "name": "adversarial-answer",
+  "version": "2.0.0",
+  "private": true,
+  "description": "adversarial-answer Skill — Failure Mode Router による敵対的検証回答スキル",
+  "type": "module",
+  "scripts": {
+    "validate": "node tools/validate.mjs",
+    "validate:strict": "node tools/validate.mjs --require-v2",
+    "build": "node tools/build.mjs",
+    "hash": "node tools/hash.mjs"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
+  }
+}
