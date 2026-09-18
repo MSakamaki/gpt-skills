@@ -11,7 +11,7 @@ description: >-
 
 # スライド作成スタジオ
 
-版：1.0.0
+版：1.1.0
 
 ## 目的と範囲
 
@@ -26,7 +26,18 @@ description: >-
 - PPTX テンプレート無しでの組み上げ。テンプレートはユーザーが提供する前提とし、無ければ該当 Context は BLOCKED になる
 - 特定のテンプレートや「美しさ」への固定。根拠の無いデザインルールの強制
 
-会話と Artifact は日本語で書く。Context 名・Artifact 名・Status などの識別子は英語のまま使う。
+## 作業言語と成果物の声
+
+**作業の記録と、聴衆が読む文字列を混ぜない。**
+
+| 区分 | 何に適用するか | 何に従うか |
+|---|---|---|
+| 作業言語 | Router の応答、結果ブロック、「次にすること」、Artifact の説明・理由・根拠・注記、`review_result` の所見、Validator の判定 | 日本語の常体。識別子 (Context 名・Artifact 名・Status・YAML のキー) は英語 |
+| 成果物の声 | 聴衆が読む・聞く文字列そのもの (画面文章、話者が話す内容、活動指示、Handout の補足、字幕) | `presentation_brief.deliverable_voice` の言語・表記・トーン・読解水準 |
+
+「対象者は幼稚園児、明るく楽しくひらがなで」のような指定は**成果物の声**であって、作業の記録には適用しない。`audience_profile` や `review_result` をひらがなで書かない。逆に、成果物だけ英語にする依頼でも、作業の記録は日本語のままにする。
+
+各 Context ファイルの出力スキーマで `[成果物の声]` と印が付いた項目だけが成果物の声に従う。印の無い項目は作業言語で書く。`deliverable_voice` が未確定のうちは、対象者に合わせた既定を仮に使い、確定していないことを記録する。
 
 ## 起動と継続
 
@@ -49,6 +60,8 @@ description: >-
 | I-07 | **内容を先に、装飾を後にする。** 目的・聴衆 → 内容 → 主張/活動目的 → 証拠 → 視覚表現 → Layout → Visual Style → Rendering。テンプレート・配色・装飾から内容を決めない |
 | I-08 | **画面上の文章と話者の説明を分ける。** `slide_copy_spec` ≠ `speaker_track` |
 | I-09 | **固定値を科学的法則として扱わない。** 1 分 1 枚、6×6、10 分で注意が切れる、必ず 24pt、必ず 2 色、必ず 1 枚 1 主張などは初期値・ヒューリスティックであり、聴衆・用途・表示環境を優先する |
+| I-15 | **作業言語と成果物の声を分ける。** 成果物向けの言語・表記・トーン・読解水準の指定を、Artifact の記述・所見・案内・結果ブロックへ適用しない |
+| I-16 | **各ターンを結果ブロックと「次にすること」で終える。** 利用者が次に打てる操作を示さずにターンを終えない |
 
 ## Context の結果
 
@@ -78,6 +91,48 @@ rollback_target: null
 ```
 
 `BLOCKED` では、何が不足しているか、それをどの Context が生成するか、外部入力ならユーザーがどう提供するかを `issues` に書く。`FAIL` では `rollback_target` を必ず書く。
+
+## 次にすること (毎ターン必須)
+
+結果ブロックの直後に、次の形で置く (I-16)。1 Turn = 1 Context とは毎ターン人間の操作が要るということであり、結果だけを返すと作業が止まる。
+
+```markdown
+**次にすること**
+
+- `次へ` — slide-assertion-designer-reviewer が、いま作った主張を検証する ← 推奨
+- `状況` — 進捗と、いま実行できる工程の一覧
+- `slide-assertion-designer S03` — 主張を作り直す
+```
+
+- 操作は**そのまま打てる形**で書く。Context 名を出すときは Slide 番号まで書く
+- 各操作に「それを選ぶと何が起きるか」を 1 行添える。Context 名だけを並べない
+- 推奨は 1 つだけ。Registry の `next` が示す既定を指し、内容の良し悪しには触れない (I-06)
+- 選択肢は原則 4 つまで。多いときは `状況` へ誘導する
+- 作業言語で書く。成果物の声を使わない (I-15)
+
+`FAIL` では、所見の要点を 1〜2 文の日本語で先に書き、`戻す` が何を作り直すかを示す。
+
+```markdown
+S03 の主張が「売上推移」というトピック名のままで、聴衆に何が残るか読めません。
+
+**次にすること**
+
+- `戻す` — slide-assertion-designer S03 が、所見を反映した v2 を作る ← 推奨
+- `slide-sequence-designer` — この Slide の役割自体を見直す
+```
+
+`BLOCKED` では、足りないものと入手方法を書く。ユーザーが渡す外部入力なら渡し方を具体的に書く。
+
+```markdown
+PPTX テンプレートがまだ無いため、配布形態を決められません。
+
+**次にすること**
+
+- テンプレート (`.pptx` / `.potx`) をこの会話へ添付する ← 推奨。添付後にもう一度 `次へ`
+- `状況` — テンプレート無しでも進められる工程の一覧
+```
+
+完成状態に達したターンでも、残っている作業 (実測、`outcome-evaluator`、別の配布形態) を示す。
 
 ## Artifact の表現と承認
 
@@ -127,9 +182,9 @@ recommended_next: slide-assertion-designer
 4. **前提 Artifact を確認する。** `requires` の各 Artifact が会話中 (ファイルが使える環境ではファイルも) に存在し、承認済みであることを確かめる。外部入力は存在だけを確かめる。満たされなければ `BLOCKED` を返して終了する。**不足を推測で補わない**
 5. **対象 Context だけを読み込む。** `references/contexts/` 配下の `<stage>/<context>.md` を 1 つだけ読む。他の Context ファイルを読まない。その Context ファイルが指定する `references/domain-guide.md` の節だけを読む
 6. **実行する。** Context ファイルの手順に従い、Artifact (Specialist) または `review_result` (Reviewer / Validator) を出力する
-7. **結果ブロックを出し、次を案内して終了する。** `recommended_next` と、他に実行可能な Context があればそれも示す。`FAIL` なら `rollback_target` を示す。**次の Context を続けて実行しない**
+7. **結果ブロックと「次にすること」を出して終了する。** `recommended_next` と、他に実行可能な Context があればそれも示す。`FAIL` なら `rollback_target` を示す。**次の Context を続けて実行しない**
 
-Router がやってはならないこと。Context の中身を先読みして代わりに設計する、複数 Context を 1 Turn で回す、上流 Artifact を書き換える、FAIL の成果物を直して PASS にする、`requires` の不足を「たぶんこうだろう」で埋める。
+Router がやってはならないこと。Context の中身を先読みして代わりに設計する、複数 Context を 1 Turn で回す、上流 Artifact を書き換える、FAIL の成果物を直して PASS にする、`requires` の不足を「たぶんこうだろう」で埋める、「次にすること」を省いて結果だけ返す。
 
 ## ユーザー操作の解釈
 
@@ -210,12 +265,14 @@ Foundation と Deck Design は Deck 全体で 1 回。`slide_sequence_plan` が�
 - 画面文章 (`slide_copy_spec`) と話者原稿 (`speaker_track`) の統合
 - 装飾目的の Animation
 - Accessibility の後付け (`accessibility_policy` は Foundation で決め、以降の全工程が従う)
+- 成果物向けのトーン・表記・読解水準を、作業の記録や案内へ適用すること
+- 次にできる操作を示さずにターンを終えること
 - 固定的なスライド枚数ルール
 - 実測なしで Outcome を PASS と宣言すること
 - 「見やすい」という主観だけで最終品質を判定すること
 
 ## 保守と確認
 
-実行規則の正本はこの `SKILL.md`、Context の一覧と遷移は `references/REGISTRY.md`、各 Context の手順は `references/contexts/`、ドメイン知識は `references/domain-guide.md`。導入と環境差は [README](README.md)、変更内容は [更新履歴](CHANGELOG.md)、受入テストの期待結果は [確認ケース](references/test-cases.md) を参照する。通常の実行でこれらの保守資料を読み込まない。
+実行規則の正本はこの `SKILL.md`、Context の一覧と遷移は `references/REGISTRY.md`、各 Context の手順は `references/contexts/`、ドメイン知識は `references/domain-guide.md`。導入と環境差は [README](README.md)、ターンの並びの例は [進行例](SAMPLES.md)、変更内容は [更新履歴](CHANGELOG.md)、受入テストの期待結果は [確認ケース](references/test-cases.md) を参照する。通常の実行でこれらの保守資料を読み込まない。
 
 ファイル構造や文面の静的検査だけで、実際の明示起動・1 Turn 1 Context・差し戻し・生成物の品質を検証済みと報告しない。

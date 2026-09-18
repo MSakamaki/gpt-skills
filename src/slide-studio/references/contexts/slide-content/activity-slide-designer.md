@@ -21,6 +21,7 @@ Workshop や演習で作業中に表示し続けられる活動 Slide の内容�
 | `slide_sequence_item@S` | `purpose`、`time_minutes`、`keeps_on_screen`、`section_ref` |
 | `presentation_mode_spec` | 進行形式、interaction 方針、participant-driven の範囲、オンライン / 対面 |
 | `audience_profile` | 既有知識・専門性。手順の粒度と前提の量 |
+| `presentation_brief.deliverable_voice` | 参加者が画面で読む文字列の言語・表記・トーン・読解水準。`resume_check` などの記録欄には適用しない (I-15) |
 
 ## 出力：`activity_slide_spec@S`
 
@@ -31,17 +32,18 @@ version: 1
 produced_by: activity-slide-designer
 based_on: [slide_sequence_plan v1, presentation_mode_spec v1, audience_profile v1]
 slide_id: S05
+voice_applied: deliverable_voice v1   # 下の [成果物の声] 項目へ適用した声
 activity_type: exercise           # question | poll | recall_check | exercise | pair_work | discussion | share | reflection
-goal: |                           # 目的。参加者が身につける・確認すること (1 文)
+goal: |                           # [成果物の声] 目的。参加者が身につける・確認すること (1 文)
 steps:                            # 手順
   - order: 1
-    action: |
+    action: |                     # [成果物の声]
     minutes: 1
     mode: individual              # individual | pair | group | plenary
-deliverable: |                    # 成果物。形式と量 (例: 30 字以内の見出し 1 つ)
+deliverable: |                    # [成果物の声] 成果物。形式と量 (例: 30 字以内の見出し 1 つ)
 time_total_minutes: 3             # 目安 (D)。実測で調整
-cautions: []                      # 注意点
-reference_on_screen: []           # 作業中に参照すべき情報 (前 Slide の要点、データの場所、例)
+cautions: []                      # [成果物の声] 注意点
+reference_on_screen: []           # [成果物の声] 作業中に参照すべき情報 (前 Slide の要点、データの場所、例)
 resume_check: |                   # 口頭指示を聞き逃しても、この画面だけで再開できるか
 timer_display: countdown          # countdown | none (実装は後工程)
 facilitator_notes_needed: []      # 話者へ譲る内容 (speaker-track-designer が扱う)
@@ -56,7 +58,8 @@ facilitator_notes_needed: []      # 話者へ譲る内容 (speaker-track-designe
 5. 時間を段ごとと合計で目安として書く。§4 の例 (個人 1 分 → ペア比較 1 分 → 修正 1 分) を初期値として使い、固定則にしない
 6. 作業中に参照すべき情報 (`reference_on_screen`) を、この画面に残す最小限で列挙する。前 Slide の要点が必要なら「何を」だけ書き、内容は該当 Slide の Artifact を参照する
 7. `resume_check` として、口頭指示を聞かずにこの画面だけで再開できるかを自問し、足りない要素を補う。進行者が口頭で補える説明は `facilitator_notes_needed` へ譲る
-8. 想起・説明・制作の機会になっているか (聞くだけでないか) を確認する。間隔や頻度は初期値であり実測で調整する前提を `cautions` に残す
+8. `[成果物の声]` の項目に `deliverable_voice` を適用する。参加者が画面で読んで自力で作業する文字列なので、語彙と表記を読解水準に合わせる。**`resume_check` `facilitator_notes_needed` `activity_type` は作業言語のまま** (I-15)
+9. 想起・説明・制作の機会になっているか (聞くだけでないか) を確認する。間隔や頻度は初期値であり実測で調整する前提を `cautions` に残す
 
 ## 参照するガイド
 

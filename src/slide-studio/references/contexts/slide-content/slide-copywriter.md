@@ -23,6 +23,7 @@
 | `visual_medium_plan@S` | 何を図表・図解・文章で表すか。文章で担う範囲 |
 | `media_specs@S` | 図表・図解の要素 id。注釈・強調をどこに付けるか (0 個のこともある) |
 | `audience_profile` | 用語・略語の前提、文字量の許容 (聴衆相対) |
+| `presentation_brief.deliverable_voice` | 画面に出す文字列の言語・表記・トーン・読解水準。この Artifact の説明欄には適用しない (I-15) |
 
 ## 出力：`slide_copy_spec@S`
 
@@ -33,18 +34,19 @@ version: 1
 produced_by: slide-copywriter
 based_on: [slide_assertion_spec@S03 v1, slide_evidence_pack@S03 v1, visual_medium_plan@S03 v1, chart_spec@S03 v1, audience_profile v1]
 slide_id: S03
-headline: |                     # 主張型: assertion を見出し化した 1 文。活動型: 活動の見出し。構造型: 区切りの見出し
+voice_applied: deliverable_voice v1   # 下の [成果物の声] 項目へ適用した声
+headline: |                     # [成果物の声] 主張型: assertion を見出し化した 1 文。活動型: 活動の見出し。構造型: 区切りの見出し
 headline_source: assertion      # assertion | activity_goal | structural_signal
 labels:                         # 要素を識別する短い名称
   - target: chart-1.series.新規顧客
-    text: 新規顧客
+    text: 新規顧客               # [成果物の声]
 annotations:                    # 図表・図解に添える短い注釈 (1 フレーズ)
   - target: chart-1.point.Q2
-    text: "+18%"
+    text: "+18%"                # [成果物の声]
     purpose: emphasis           # emphasis | explanation | unit | source
-callouts: []                    # 強調する短句 (原則 0〜2)
-short_instructions: []          # 活動型: 手順・成果物・時間の短文
-source_note: |                  # 出典の短い表記 (必要なら)。詳細は配布版へ
+callouts: []                    # [成果物の声] 強調する短句 (原則 0〜2)
+short_instructions: []          # [成果物の声] 活動型: 手順・成果物・時間の短文
+source_note: |                  # [成果物の声] 出典の短い表記 (必要なら)。詳細は配布版へ
 on_screen_excluded:             # 画面に置かず話者へ譲る内容
   - content: |
     reason: |                   # 因果 / 解釈 / 判断 / Story だから
@@ -59,6 +61,7 @@ character_budget_note: |        # 聴衆と用途から見た文字量の考え�
 4. 話者が担う内容 (なぜ、だから何か、解釈、判断、Story) を `on_screen_excluded` に理由付きで移す。画面には構造・比較・位置関係・証拠を担う文章だけ残す
 5. 文字量は聴衆相対で決める。専門家向けには条件・単位・n のラベルが増え、初学者向けには前提のラベルが要る。「必ず N 文字以内」「6×6」を規則にしない
 6. `audience_profile` に合わせて用語・略語を選ぶ。定着した表記 (`AI` など) は無理に置き換えない。出典が必要なら `source_note` にとどめ、詳細は配布版へ譲る
+6a. `[成果物の声]` の項目に `deliverable_voice` の言語・表記・トーン・読解水準を適用する。ひらがな指定なら画面文章をひらがなにし、英語指定なら英語にする。**`purpose` `reason` `character_budget_note` などの説明欄は作業言語のまま** (I-15)。`deliverable_voice` が未確定なら `audience_profile` から導いた既定を使い、その旨を `character_budget_note` に書く
 7. `content_spec@S` に無い事実・数値を書かない。必要な数値が無ければ `BLOCKED` にして `<content-designer>` (証拠の不足なら `slide-evidence-selector`) への差し戻し候補を書く
 
 ## 参照するガイド

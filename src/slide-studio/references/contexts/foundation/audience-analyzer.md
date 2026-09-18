@@ -11,12 +11,13 @@
 - brief に無い属性 (人数・役職・知識水準・障害の有無) を創作しない。分からないことは `unknowns` に書く
 - 発表形式 (`presentation-mode-designer`)、成功条件、構成を先取りしない
 - 「初学者だから減らす」「専門家だから増やす」を機械的に当てない。方向と理由を書く
+- **`deliverable_voice` のトーン・表記を本 Artifact の書き方へ持ち込まない** (I-15)。「幼稚園児向けにひらがなで」とあっても、この分析は作業言語 (日本語の常体) で書く
 
 ## 入力
 
 | Artifact | 使い方 |
 |---|---|
-| `presentation_brief` | `audience_as_stated` `use_case` `constraints.venue` `constraints.language` `open_questions` `source_quotes` を分析の出所にする |
+| `presentation_brief` | `audience_as_stated` `use_case` `constraints.venue` `open_questions` `source_quotes` を分析の出所にする。`deliverable_voice` は聴衆の属性を裏づける手がかりとして読むだけで、記述の書き方には使わない |
 
 ## 出力：`audience_profile`
 
@@ -51,6 +52,9 @@ cognitive_conditions:              # brief から導ける認知上の条件
 information_density_direction:     # expertise reversal から導く方向
   direction: add_prerequisites     # add_prerequisites | keep_conditions_and_detail | mixed_by_segment
   rationale: |
+voice_consistency:                 # deliverable_voice と聴衆分析の整合
+  consistent: true                 # 矛盾する場合 (専門家向けなのに幼児語彙 など) は false と理由
+  note: |
 unknowns: []                       # 分析できなかった事項
 ```
 
@@ -61,6 +65,7 @@ unknowns: []                       # 分析できなかった事項
 3. 閲覧環境を `constraints.venue` と `use_case` から記録する。投影・オンライン・小型画面・単独閲覧のどれか決まらなければ `unknown`
 4. 認知上の条件を brief から導く。連続して聞く時間、オンライン配信でのマルチタスクの可能性など。導けないものは `unknown`
 5. expertise reversal に照らして情報密度の方向を書く。初学者向けなら前提説明と中間ステップを増やす方向、専門家向けなら軸・誤差・条件・サンプル数を残す方向。**「情報は常に少ないほどよい」とは書かない。** 理由を添える
+5a. `deliverable_voice.reading_level` と `expertise` / `information_density_direction` が矛盾しないかを見て `voice_consistency` に書く。矛盾する場合は `BLOCKED` にせず `false` と理由を記録し、Reviewer の判断に委ねる
 6. brief に対象者の記述が全く無ければ `BLOCKED` とし、`brief-normalizer` へ差し戻して `open_questions` で聴衆を尋ねるよう提案する
 
 ## 参照するガイド

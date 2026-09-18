@@ -14,6 +14,7 @@
 | `visual_medium_plan@S` | 文章で担うべき範囲との整合 |
 | `media_specs@S` | ラベル・注釈の `target` が実在する要素か |
 | `audience_profile` | 用語・文字量の適否 (聴衆相対) |
+| `presentation_brief.deliverable_voice` | 画面文章が従うべき声との照合 |
 | `slide_copy_spec@S` | 検証対象 |
 
 ## 確認観点
@@ -30,10 +31,11 @@
 | 8 | 活動型で `short_instructions` が手順・成果物・時間を保ち、説明文になっていないか | ガイド §4 活動スライド |
 | 9 | 用語・略語・文字量が `audience_profile` に合うか。固定の文字数ルールを根拠にしていないか | I-09、ガイド §2 expertise reversal |
 | 10 | レイアウト・フォント・色を先取りしていないか | 責務境界 |
+| 11 | `[成果物の声]` の項目が `deliverable_voice` の言語・表記・トーン・読解水準に従うか。逆に `purpose` `reason` などの説明欄が作業言語のままか | I-15 |
 
 ## 判定
 
-- 観点 1・2・3・7 は `CRITICAL`。観点 4・6・8・9 は `MAJOR`。観点 5・10 は `MINOR`
+- 観点 1・2・3・7 は `CRITICAL`。観点 4・6・8・9・11 は `MAJOR`。観点 5・10 は `MINOR`
 - `CRITICAL` / `MAJOR` が 1 つでもあれば `FAIL`
 
 | 問題の種類 | rollback_target |

@@ -22,6 +22,7 @@
 | `slide_copy_spec@S` | 画面に既にある文章。繰り返さないものの一覧、`sync_points` の対象要素 |
 | `audience_profile` | 既有知識に応じた説明の深さ、用語 |
 | `deck_outline` | 前後の Slide とのつなぎ (Story)。`transitions.logic` |
+| `presentation_brief.deliverable_voice` | 聴衆が聞く文字列の言語・表記・トーン・読解水準。`not_to_repeat_on_slide` などの記録欄には適用しない (I-15) |
 
 ## 出力：`speaker_track@S`
 
@@ -32,10 +33,11 @@ version: 1
 produced_by: speaker-track-designer
 based_on: [slide_assertion_spec@S03 v1, slide_evidence_pack@S03 v1, slide_copy_spec@S03 v1, audience_profile v1, deck_outline v1]
 slide_id: S03
-spoken_message: |               # 話者が伝える核 (2〜4 文)。見出しを読まずに「なぜそう言えるか」から入る
-reasoning: |                    # 因果・根拠のつなぎ (証拠が主張をどう支えるか)
-interpretation: |               # 意味・解釈・判断 (含意、限界)
-story_link:                     # 前後の Slide とのつなぎ (deck_outline.transitions から)
+voice_applied: deliverable_voice v1   # 下の [成果物の声] 項目へ適用した声
+spoken_message: |               # [成果物の声] 話者が伝える核 (2〜4 文)。見出しを読まずに「なぜそう言えるか」から入る
+reasoning: |                    # [成果物の声] 因果・根拠のつなぎ (証拠が主張をどう支えるか)
+interpretation: |               # [成果物の声] 意味・解釈・判断 (含意、限界)
+story_link:                     # [成果物の声] 前後の Slide とのつなぎ (deck_outline.transitions から)
   from_previous: |
   to_next: |
 not_to_repeat_on_slide:         # 画面に既にあり、読み上げない要素
@@ -45,10 +47,10 @@ sync_points:                    # 画面要素と話す順序の対応。id は 
   - id: SP-1
     order: 1
     element: chart-1            # media_specs / slide_copy_spec の要素 id
-    say: |                      # その要素を指しながら話す要点
-    cue: |                      # 切り替えの合図 (例: 「Q2 に注目」)
+    say: |                      # [成果物の声] その要素を指しながら話す要点
+    cue: |                      # [成果物の声] 切り替えの合図 (例: 「Q2 に注目」)
 estimated_time: 60              # 秒。目安 (D)。リハーサルで実測して調整
-facilitator_prompts: []         # 活動型: 声かけ・時間管理・共有の進め方
+facilitator_prompts: []         # [成果物の声] 活動型: 声かけ・時間管理・共有の進め方
 audience_adaptation: |          # 専門性に応じて深めた / 省いた説明
 open_questions: []
 ```
@@ -62,7 +64,8 @@ open_questions: []
 5. `audience_profile` に合わせて説明の深さを調整する。専門家には条件・限界・比較対象を、初学者には前提と例を。判断を `audience_adaptation` に書く
 6. 活動型では `facilitator_prompts` に声かけ・時間管理・共有の進め方を書く。画面に無いと再開できない指示は話者に持たせず `issues` に画面側の不足として書く
 7. 想定時間を秒で目安として書く。「1 分 1 枚」を根拠にせず話す量から見積もり、実測で調整する前提を残す
-8. 画面と音声で同じ内容を二重に処理させていないか (読む・聞く・図と対応させる、を同時に要求していないか) を最後に点検する
+8. `[成果物の声]` の項目に `deliverable_voice` を適用する。聴衆が聞く言葉なので、語彙と調子を聴衆に合わせる。**`not_to_repeat_on_slide` `estimated_time` `audience_adaptation` `open_questions` は作業言語のまま** (I-15)
+9. 画面と音声で同じ内容を二重に処理させていないか (読む・聞く・図と対応させる、を同時に要求していないか) を最後に点検する
 
 ## 参照するガイド
 

@@ -62,9 +62,23 @@ notes: []
 
 ## 案内の文面
 
+出力は作業言語で書く。依頼にトーン・表記の指定があっても案内には適用しない (I-15)。
+
 - 初回: 「`brief-normalizer` から始めます。依頼内容と、あれば元資料・PPTX テンプレートを教えてください。1 回の操作で 1 工程だけ進み、各工程の成果物は別の Reviewer が検証します」
 - 途中: 進捗表 (Deck 全体 / Slide ごと) + 次候補 + 差し戻し先。長い説明を繰り返さない
 - 「全部進めて」と言われたとき: 1 Turn = 1 Context の理由を 1 文で伝え、最初の 1 Context を提案する
+
+本 Context も「次にすること」で終える (I-16)。`executable_now` をそのまま並べるのではなく、**利用者が次に打てる操作**へ翻訳する。
+
+```markdown
+**次にすること**
+
+- `次へ` — visual-medium-router S01: Slide 1 の証拠をどう見せるか (図表 / 表 / 図解 / 文字) を決める ← 推奨
+- `slide-content-model-router S02` — Slide 2 の内容設計を先に始める
+- PPTX テンプレート (`.pptx` / `.potx`) を添付する — Build 系の工程を解くのに要る
+```
+
+止まっている工程があるときは、その原因を作業の言葉で 1 行にする。「`slide-builder S01` は `visual_style_spec@S01` 待ちです」ではなく「Slide 1 の組み上げは、まだスタイルが決まっていないので実行できません」のように書き、続けて解き方を示す。
 
 ## 参照するガイド
 
@@ -74,3 +88,4 @@ notes: []
 
 - `status: COMPLETE`、`output_artifact: navigation_result`、`recommended_next` は既定の次工程 (人間が変えてよい)
 - BLOCKED になることはない。会話に Artifact が無ければ「無い」と示す
+- 結果ブロックの後に「次にすること」を置く (I-16)

@@ -9,7 +9,7 @@ ChatGPT 向けの Skill をまとめたリポジトリ (一部は Codex / API �
 | [adversarial-answer](src/adversarial-answer/SKILL.md) | 依頼を 10 項目で確定し、想定される失敗モードに適した敵対的検証を 3 回行って回答を作る | chatgpt / codex / api / atlas |
 | [guided-clarification](src/guided-clarification/SKILL.md) | 最終回答を実質的に変える確認だけを `0/1/2/3/9` の選択式で 1 問ずつ行ってから回答する | chatgpt |
 | [slide-visual](src/slide-visual/SKILL.md) | 議論済みのスライドから、固定したフラットスタイルの差し込み画像を生成する。説明量は画像ごとに選ぶ | chatgpt / codex / api / atlas |
-| [slide-studio](src/slide-studio/SKILL.md) | 目的・聴衆の整理から PPTX テンプレートへの組み上げと検証まで、69 の専門 Context を 1 回の操作につき 1 つだけ実行して進める。Designer と Reviewer を分離し、FAIL は差し戻し先を示して止まる | chatgpt / codex / api / atlas |
+| [slide-studio](src/slide-studio/SKILL.md) | 目的・聴衆の整理から PPTX テンプレートへの組み上げと検証まで、69 の専門 Context を 1 回の操作につき 1 つだけ実行して進める。Designer と Reviewer を分離し、FAIL は差し戻し先を示して止まる。各ターンは次に打てる操作を示して終わる | chatgpt / codex / api / atlas |
 
 対応プロダクトは各 Skill の `agents/openai.yaml` の `policy.products` が正本。いずれも `allow_implicit_invocation: false` で、ユーザーが明示的に起動したときだけ動く。
 
@@ -37,7 +37,7 @@ gpt-skills/
 └── CLAUDE.md                メンテナンス手順
 ```
 
-Skill 1 つの構成は次のとおり。必須は `SKILL.md` と `agents/openai.yaml` の 2 つだけ。`references/` は任意で、中身は Skill ごとに違う (`adversarial-answer` は Method Card と論文、`slide-visual` は確認ケース、`slide-studio` は Context Registry と 69 本の Context ファイルとドメインガイド、`guided-clarification` は持たない)。
+Skill 1 つの構成は次のとおり。必須は `SKILL.md` と `agents/openai.yaml` の 2 つだけ。`references/` は任意で、中身は Skill ごとに違う (`adversarial-answer` は Method Card と論文、`slide-visual` は確認ケース、`slide-studio` は Context Registry と 69 本の Context ファイルとドメインガイド、`guided-clarification` は持たない)。`slide-studio` は進行例 `SAMPLES.md` も同梱する (実行時には読まない)。
 
 ```text
 src/adversarial-answer/          ← ディレクトリ名 = SKILL.md の name

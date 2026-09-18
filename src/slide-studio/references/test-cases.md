@@ -1,6 +1,6 @@
 # 確認ケース
 
-対象版：1.0.0。保守・試験用であり、通常の実行では読み込まない。**ケースの記載は試験の実施・合格を意味しない。** 静的検査と、会話動作・生成物の実地検証を分ける。
+対象版：1.1.0。保守・試験用であり、通常の実行では読み込まない。**ケースの記載は試験の実施・合格を意味しない。** 静的検査と、会話動作・生成物の実地検証を分ける。
 
 ## 目次
 
@@ -8,6 +8,8 @@
 - 受入テスト (設計仕様 §33 の Case 1〜10)
 - Router と Turn の確認
 - Build と実行環境の確認
+- 言語とトーンの確認
+- ターン末の案内の確認
 - 静的検査
 - 実行記録と判定
 
@@ -72,9 +74,37 @@ slide-studio を使って。役員向け 10 分の社内報告。Q2 の売上実
 | B08 | `delivery_artifact_plan.handout: true` で `delivery-variant-builder` を実行 | Live 用と別に Handout を作り、注記・出典・補足を加える。Live 用を単純に報告書化しない |
 | B09 | `slide_copy_spec@S03` の文章が `slide_layout_spec@S03` の領域に収まらない | `slide-builder` は縮めず `BLOCKED`。`slide-layout-planner` / `slide-copywriter` への差し戻し候補を示す |
 
+## 言語とトーンの確認
+
+成果物の声 (聴衆が読む文字列) と作業言語 (作業の記録) の分離。1.0.0 の実地検証で、対象読者向けのトーン指定が Artifact の記述まで変えてしまった問題への確認。
+
+| ID | 前提・入力 | 期待結果 |
+| --- | --- | --- |
+| L01 | 「slide-studio を使って。対象者は幼稚園児、トーンは明るく楽しくひらがなで」と依頼し `brief-normalizer` を実行 | トーン・表記・読解水準を `deliverable_voice` に記録する。**`presentation_brief` 自身の記述・結果ブロック・案内は通常の日本語で書く。** ひらがなにしない |
+| L02 | L01 に続けて `audience-analyzer` と `brief-normalizer-reviewer` を実行 | `audience_profile` の分析文と `review_result` の所見が通常の日本語。`voice_consistency` で読解水準と専門性の整合を見ている |
+| L03 | L01 の依頼で `slide-copywriter S03` を実行 | `headline` `labels` `annotations` などの `[成果物の声]` 項目がひらがな。`purpose` `reason` `character_budget_note` は通常の日本語 |
+| L04 | L01 の依頼で `speaker-track-designer S03` と `activity-slide-designer S05` を実行 | `spoken_message` `reasoning` `goal` `steps[].action` がひらがな。`not_to_repeat_on_slide` `estimated_time` `resume_check` は通常の日本語 |
+| L05 | 「スライドは英語で、やり取りは日本語で」と依頼 | `deliverable_voice.language: en`。画面文章と話す内容が英語、作業の記録と案内は日本語 |
+| L06 | `deliverable_voice` が未確定のまま `slide-copywriter` を実行 | 対象者から導いた既定を仮に使い、確定していないことを記録する。推測を確定として書かない |
+| L07 | 「専門家向け」と「幼児にも分かる語彙で」が同時に指定される | `audience-analyzer` が `voice_consistency: false` と理由を記録し、Reviewer が `brief-normalizer` への差し戻しを判断できる |
+
+## ターン末の案内の確認
+
+「次にすること」ブロック。1.0.0 の実地検証で、工程が切り替わった後に利用者が何をすればよいか分からず作業が止まった問題への確認。
+
+| ID | 前提・入力 | 期待結果 |
+| --- | --- | --- |
+| N01 | どの Context でも実行した直後 | 結果ブロックの後に「次にすること」があり、そのまま打てる操作 (`次へ` `戻す` `状況` `<context> S03` など) が並び、各操作に何が起きるかが 1 行添えられ、推奨が 1 つだけ付く |
+| N02 | `次へ` で工程が切り替わった直後 | 現在の状況だけで終わらせない。次の操作を示す。Context 名だけを列挙しない |
+| N03 | 実行できる工程が 5 つ以上ある | 選択肢を 4 つ程度に絞り、`状況` へ誘導する |
+| N04 | `BLOCKED` で終わる (テンプレート無し、実測情報無し) | 足りないものと入手方法を書く。外部入力ならユーザーがどう渡すかを具体的に書く |
+| N05 | `FAIL` で終わる | 所見の要点を 1〜2 文の日本語で先に書き、`戻す` が何を作り直すかを示す。YAML を読ませて済ませない |
+| N06 | `DELIVERY_READY` に到達したターン | 残っている作業 (実測、`outcome-evaluator`、別の配布形態) を示す |
+| N07 | 推奨の書き方 | 推奨は Registry の `next` が示す既定を指す。内容の良し悪し (「この主張の方がよい」) を推奨しない |
+
 ## 静的検査
 
-配布ファイルを読み取って検査できる項目。A・T・B の動作や生成物の品質の代わりにはしない。
+配布ファイルを読み取って検査できる項目。A・T・B・L・N の動作や生成物の品質の代わりにはしない。
 
 | ID | 検査 | 判定対象 |
 | --- | --- | --- |
@@ -86,8 +116,11 @@ slide-studio を使って。役員向け 10 分の社内報告。Q2 の売上実
 | S06 | ドメインガイド | 私用文字 (旧引用マーカー) が残っていない。§1〜§7 の見出し番号がある。本文が元原稿と一致する (置換・番号付与・冒頭注記・付録以外の差分が無い) |
 | S07 | 受入テストの遷移 (A01 / A02 / A05) | Registry の `next` / `rollback_candidates` の連鎖で経路が成立する |
 | S08 | 配布 ZIP | 破損がなく、SKILL.md は 1 つ。編集した全ファイルと配布内容が一致し、余分なファイル・認証情報を含まない |
+| S09 | 言語分離の記述 | `SKILL.md` に作業言語と成果物の声の表があり、`deliverable_voice` が `brief-normalizer` の出力スキーマにある。適用先の Context の出力スキーマに `[成果物の声]` の印がある |
+| S10 | 案内の記述 | `SKILL.md` に「次にすること」の形式と規則があり、Router の手順 7 と `workflow-navigator` が参照している |
+| S11 | SAMPLES.md | 例が `SKILL.md` / `REGISTRY.md` / Context ファイルと矛盾しない (Context 名・Artifact 名・遷移・Status) |
 
-S03〜S05 は `npm run check` (validate / verify-package) が検査する。S06・S07 は保守時に検査スクリプトで確認し、結果を保守記録へ残す。
+S03〜S05 は `npm run check` (validate / verify-package) が検査する。S06・S07・S11 は保守時に検査スクリプトまたは読み合わせで確認し、結果を保守記録へ残す。
 
 ## 実行記録と判定
 
@@ -104,4 +137,4 @@ Skill版／ZIPのハッシュ：
 期待結果との差分：
 ```
 
-静的検査の合格だけで A・T・B の合格を報告しない。会話の実地試験を行わなかった場合は、それらを未実施とする。
+静的検査の合格だけで A・T・B・L・N の合格を報告しない。会話の実地試験を行わなかった場合は、それらを未実施とする。

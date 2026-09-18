@@ -25,16 +25,18 @@
 | 6 | アクセシビリティ要件の `status` が正直か (根拠なく `none_stated` としていないか) | 出力仕様 |
 | 7 | 聴衆が一様でない場合に segment が分かれ、主対象が 1 つ決まっているか (決められない場合は `unknowns` にあるか) | 出力仕様 |
 | 8 | 発表形式・成功条件・構成など他 Context の領分を先取りしていないか | 責務境界 |
+| 9 | **本 Artifact が作業言語 (日本語の常体、識別子は英語) で書かれているか。** `deliverable_voice` のトーン・表記 (ひらがな、英語など) が記述へ適用されていないか | I-15 |
+| 10 | `voice_consistency` が `deliverable_voice.reading_level` と `expertise` / 密度方向の関係を正しく見ているか | `deliverable_voice` |
 
 ## 判定
 
-- 観点 1・3 は `CRITICAL`。観点 2・4・5・6・7 は `MAJOR`。観点 8 は `MINOR`
+- 観点 1・3・9 は `CRITICAL`。観点 2・4・5・6・7・10 は `MAJOR`。観点 8 は `MINOR`
 - `CRITICAL` / `MAJOR` が 1 つでもあれば `FAIL`
 
 | 問題の種類 | rollback_target |
 |---|---|
-| 創作・漏れ・推測・密度方向の根拠不足 | `audience-analyzer` |
-| brief 自体が対象者を欠く、または brief の記述が矛盾している | `brief-normalizer` |
+| 創作・漏れ・推測・密度方向の根拠不足、成果物の声を記述へ適用 | `audience-analyzer` |
+| brief 自体が対象者を欠く、記述が矛盾している、`deliverable_voice` と対象者が両立しない | `brief-normalizer` |
 
 ## 出力：`review_result`
 

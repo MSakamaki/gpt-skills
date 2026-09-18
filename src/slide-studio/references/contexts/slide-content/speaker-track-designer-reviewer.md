@@ -30,10 +30,11 @@
 | 8 | 説明の深さが `audience_profile` に合うか (専門家に前提を長々と、初学者に無説明の専門用語) | ガイド §2 expertise reversal |
 | 9 | 活動型で、画面に無いと再開できない指示を話者だけに持たせていないか | ガイド §4 活動スライド |
 | 10 | 画面文章の書き換え・追加、Animation の実装を先取りしていないか | I-03、責務境界 |
+| 11 | `[成果物の声]` の項目が `deliverable_voice` に従い、記録欄 (`not_to_repeat_on_slide` `audience_adaptation` など) が作業言語のままか | I-15 |
 
 ## 判定
 
-- 観点 1・2・5 は `CRITICAL`。観点 3・4・6・8・9 は `MAJOR`。観点 7・10 は `MINOR`
+- 観点 1・2・5 は `CRITICAL`。観点 3・4・6・8・9・11 は `MAJOR`。観点 7・10 は `MINOR`
 - `CRITICAL` / `MAJOR` が 1 つでもあれば `FAIL`
 
 | 問題の種類 | rollback_target |

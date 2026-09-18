@@ -3,10 +3,10 @@
 ## 1. 文書情報
 
 - **対象**: ChatGPT / Codex Skill `slide-studio` (スライド作成スタジオ)
-- **対象バージョン**: 1.0.0
+- **対象バージョン**: 1.1.0
 - **目的**: `SKILL.md` ほか配布物の実装・保守・レビューに使用する上位仕様
 - **正本**: 本 spec。§4〜§12 は 2026-09-18 に作成された設計仕様「スライド作成 Skill 設計仕様」(旧 `plans/slide-studio-skill.md`) の固定事項を引き継いだもの。§13 は実装時に確定した事項
-- **実装物**: `SKILL.md` / `agents/openai.yaml` / `README.md` / `CHANGELOG.md` / `references/REGISTRY.md` / `references/domain-guide.md` / `references/test-cases.md` / `references/contexts/<stage>/<context>.md` (69 本)
+- **実装物**: `SKILL.md` / `agents/openai.yaml` / `README.md` / `CHANGELOG.md` / `SAMPLES.md` / `references/REGISTRY.md` / `references/domain-guide.md` / `references/test-cases.md` / `references/contexts/<stage>/<context>.md` (69 本)
 - **対象環境**: ChatGPT Web / Desktop、Codex (`policy.products` は chatgpt / codex / api / atlas)
 - **起動方式**: 明示起動のみ (`allow_implicit_invocation: false`)
 - **外部情報取得**: 利用しない (§14)
@@ -112,6 +112,22 @@ D (実務ヒューリスティック) の目安を必須ルールや科学的閾
 
 ---
 
+### DP-07: 作業言語と成果物の声を分ける
+
+Skill の会話・結果ブロック・案内・Artifact の記述は**作業言語** (日本語の常体、識別子は英語) で書く。聴衆が読む・聞く文字列は**成果物の声** (`presentation_brief.deliverable_voice` が定める言語・表記・トーン・読解水準) に従う。
+
+成果物の声は聴衆のためのものであり、作業の記録を読むのは制作者である。対象読者向けのトーン指定 (「幼稚園児向けにひらがなで」など) を作業の記録へ適用すると、記録の可読性と検証可能性が落ちる。逆に、成果物だけ別言語にしたい依頼 (日本語で作業して英語のスライドを作る) も同じ分離で扱える。
+
+---
+
+### DP-08: 各ターンは利用者が次に打てる操作で終わる
+
+1 Turn = 1 Context (I-01) とは、毎ターン人間の操作が要るということである。結果を返すだけでは作業が止まる。各ターンは、いま何が起きたか、次に何ができるか、止まっているなら何が要るかを、**そのまま打てる入力の形**で示して終える。
+
+案内するのは操作であって内容ではない。何を選ぶべきかの専門判断は Router がしない (I-06)。
+
+---
+
 ## 6. 不変条件
 
 内部のファイル構成や文面を変えても維持しなければならない条件。**いずれかを変える場合は、リファクタリングではなく仕様変更として扱う** (§21)。
@@ -132,6 +148,8 @@ D (実務ヒューリスティック) の目安を必須ルールや科学的閾
 | I-12 | PPTX テンプレートを推測で作らない。無ければ BLOCKED | §13.5 (ユーザー決定) |
 | I-13 | 画像を生成しない。`image-generator` は受け渡し仕様と配置枠を作る | §13.5 (ユーザー決定) |
 | I-14 | Validator (`accessibility-validator` 以降) を人間承認で代替しない | §13.2 |
+| I-15 | 作業言語と成果物の声を分ける。成果物向けの言語・表記・トーン・読解水準の指定を、Artifact の記述・所見・案内・結果ブロックへ適用しない | DP-07 |
+| I-16 | 各ターンを結果ブロックと「次にすること」で終える。利用者が次に打てる操作を示さずにターンを終えない | DP-08 |
 
 ---
 
@@ -147,6 +165,17 @@ D (実務ヒューリスティック) の目安を必須ルールや科学的閾
 | `BLOCKED` | 必須 Input 不足等により実行不能 |
 
 最低限、結果には `context` `status` `inputs_used` `output_artifact` `issues` `recommended_next` `rollback_target` を含める。不要フィールドは省略してよい。具体的な形式は `SKILL.md` が定める。
+
+**結果ブロックの後に「次にすること」を必ず置く** (I-16)。含めるのは次の 4 つで、いずれも作業言語で書く (I-15)。
+
+| 要素 | 内容 |
+|---|---|
+| いま起きたこと | 1 行。Status と成果物を平易な日本語で |
+| 次にできる操作 | そのまま打てる入力 (`次へ` `戻す` `状況` `<context> S03` など) と、それを選ぶと何が起きるか。推奨を 1 つだけ示す |
+| 止まっている理由 | `BLOCKED` のとき。何が足りず、誰がどう解けるか。ユーザーが渡すものなら渡し方 |
+| 問題の要点 | `FAIL` のとき。所見を 1〜2 文の日本語で。YAML を読ませて済ませない |
+
+推奨は手順上の既定 (Registry の `next`) を指すものであり、内容の良し悪しの判断ではない (I-06)。構成は §13.12。
 
 ---
 
@@ -468,6 +497,72 @@ Artifact 間の項目対応として、`speaker_track.sync_points[].id` (`SP-n`)
 - `brief-normalizer` の `materials` でテンプレートが `referenced_only` (参照のみで実体が無い) の場合、`delivery-artifact-planner` は BLOCKED とする。「コード実行が無い」場合の `inspected: false` とは別の状況
 - テンプレートのフォントが `accessibility_policy` と合わない場合、テンプレートを変える Context は無いので `open_questions` に記録し人間へ委ねる
 
+### 13.11 作業言語と成果物の声 (v1.1.0)
+
+DP-07 / I-15 の実装。実地検証で、依頼の「対象者は幼稚園児、トーンは明るく楽しくひらがなで」が `audience_profile` の記述までひらがなにしてしまい、作業の記録が読みにくくなった。原因は、成果物のトーン指定と作業の記述に境界が無かったこと。
+
+**作業言語**: 日本語の常体。識別子 (Context 名・Artifact 名・Status・YAML のキー) は英語。適用先は、Router の応答、結果ブロック、「次にすること」、Artifact の説明・理由・根拠・注記、`review_result` の所見、Validator の判定。
+
+**成果物の声**: `presentation_brief.deliverable_voice` が持つ。適用先は**聴衆が読む・聞く文字列そのもの**だけ。
+
+```yaml
+deliverable_voice:
+  language: ja               # 聴衆が読む言語
+  script: |                  # 表記の制約 (ひらがな中心、漢字にふりがな など)。無ければ「なし」
+  tone: |                    # 明るく楽しく、落ち着いて など
+  reading_level: |           # 想定読解水準 (幼稚園児、非専門の管理職 など)
+  stated_by_user: true       # 依頼に明示があったか。false なら対象者に合わせた既定であることを書く
+  source_quote: |            # 依頼文からの引用 (stated_by_user が true のとき)
+```
+
+適用対象の文字列は次のとおり。Context ファイルの出力スキーマでは該当項目に `[成果物の声]` と印を付ける。
+
+| Artifact | 成果物の声に従う項目 | 作業言語で書く項目 |
+|---|---|---|
+| `slide_copy_spec@S` | `headline` `labels[].text` `annotations[].text` `callouts` `short_instructions` | `headline_source` `purpose` `on_screen_excluded.reason` `character_budget_note` |
+| `speaker_track@S` | `spoken_message` `reasoning` `interpretation` `story_link` `facilitator_prompts` `sync_points[].say` `sync_points[].cue` | `not_to_repeat_on_slide` `estimated_time` `audience_adaptation` `open_questions` |
+| `activity_slide_spec@S` | `goal` `steps[].action` `deliverable` `cautions` `reference_on_screen` | `activity_type` `mode` `resume_check` `facilitator_notes_needed` `timer_display` |
+| `structural_slide_spec@S` | なし (文面は `slide-copywriter` が作る) | `signals` `headline_intent` `elements` `omitted_on_purpose` |
+| Chart / 表 / 図の spec | `labels` `axis_titles` `header` `rows` の表示文字列、`alt_text_intent` | `judgment_to_enable` `reason` `simplification` ほかの説明 |
+| `delivery_artifacts` | Handout の補足説明・注記、トランスクリプト、字幕 | `requirements` `verification` ほかの記録 |
+
+`reading_level` は文字量・語彙・前提説明の量にも効くため、`audience_profile.information_density_direction` と矛盾しないことを `audience-analyzer-reviewer` が確認する。矛盾する場合 (専門家向けなのに幼児語彙など) は `brief-normalizer` へ戻す。
+
+成果物の声が Accessibility 方針へ影響する場合 (ふりがな、より大きな文字) は `accessibility-policy-designer` が方針として取り込む。声そのものを Accessibility の理由で書き換えない。
+
+### 13.12 「次にすること」ブロック (v1.1.0)
+
+DP-08 / I-16 の実装。実地検証で、工程が切り替わった後に現在の状況しか出ず、利用者が何をすればよいか分からずに作業が止まった。
+
+結果ブロックの直後に、次の形で置く。
+
+```markdown
+**次にすること**
+
+- `次へ` — slide-assertion-designer-reviewer が、いま作った主張を検証する ← 推奨
+- `状況` — 進捗と、いま実行できる工程の一覧
+- `slide-assertion-designer S03` — 主張を作り直す
+```
+
+規則。
+
+1. 操作は**そのまま打てる形**で書く。Context 名を含む場合は Slide 番号まで書く
+2. 各操作に「それを選ぶと何が起きるか」を 1 行添える。Context 名だけを並べない
+3. 推奨は 1 つだけ。Registry の `next` が示す既定を指し、内容の良し悪しには触れない
+4. `FAIL` では、所見の要点を 1〜2 文の日本語で先に書き、`戻す` が何を作り直すかを示す
+5. `BLOCKED` では、足りないものと入手方法を書く。ユーザーが渡す外部入力なら渡し方を具体的に書く
+6. 選択肢は原則 4 つまで。多いときは `状況` へ誘導する
+7. 完成状態 (`DELIVERY_READY` / `OUTCOME_VALIDATED`) に達したターンでも、残っている作業 (実測、`outcome-evaluator`、別 variant) を示す
+
+### 13.13 SAMPLES.md (v1.1.0)
+
+配布物に `SAMPLES.md` を置き、実際のターンの並びを例示する。実地検証で、操作の型が文章の規定だけでは伝わらなかったため。
+
+- 通しの進行例 (起動 → Foundation → Deck → Slide 1 枚 → Build → Validation) を、結果ブロックと「次にすること」を含む実物の形で示す
+- 個別のケース (FAIL と差し戻し、BLOCKED、`状況`、人間承認、作業言語と成果物の声の分離) を短い例で示す
+- **実行時には読まない。** 利用者と保守者向けの読み物であり、`SKILL.md` は最小の例だけを持つ
+- 例は仕様の写しではない。`SKILL.md` / `REGISTRY.md` / Context ファイルと矛盾したら、それらを正本とする (§22)
+
 ---
 
 ## 14. 外部情報と実行環境機能
@@ -498,6 +593,7 @@ common.md §3 の宣言。
 | `references/domain-guide.md` | ドメイン知識 (§4) |
 | `agents/openai.yaml` | 表示情報と起動ポリシー |
 | `references/test-cases.md` | 受入基準を検証する具体的なケース (A / T / B / S) と実行記録の様式 |
+| `SAMPLES.md` | ターンの並びの例。実行時には読まない (§13.13) |
 | `README.md` / `CHANGELOG.md` | 導入・環境差・運用、変更履歴 |
 
 ---
@@ -616,6 +712,22 @@ common.md §3 の宣言。
 ### AC-24: ガイド本文の保存 (静的)
 - Then: `domain-guide.md` に私用文字が残らず、置換・番号・注記・付録を除いた本文が元原稿と一致する
 
+### AC-25: 成果物の声を作業の記録へ適用しない
+- Given: 依頼に「対象者は幼稚園児、トーンは明るく楽しくひらがなで」とある
+- Then: `brief-normalizer` はそれを `deliverable_voice` として記録し、`audience_profile` 以降の Artifact の記述・所見・結果ブロック・案内は作業言語 (日本語の常体、識別子は英語) で書く
+
+### AC-26: 成果物の声を聴衆が読む文字列へ適用する
+- Given: `deliverable_voice` に表記・トーン・読解水準がある
+- Then: `slide_copy_spec` の画面文章、`speaker_track` の話す内容、活動指示、Handout の補足がその声に従う。§13.11 の表で「作業言語で書く項目」とした欄には適用しない
+
+### AC-27: 各ターンが次の操作を示して終わる
+- When: どの Context を実行しても
+- Then: 結果ブロックの後に「次にすること」があり、そのまま打てる操作と、それを選ぶと何が起きるかが 1 行ずつ書かれ、推奨が 1 つだけ付く
+
+### AC-28: 止まった理由と解き方を示す
+- When: `BLOCKED` または `FAIL` で終わる
+- Then: `BLOCKED` は足りないものと入手方法 (外部入力なら渡し方) を、`FAIL` は所見の要点を 1〜2 文の日本語で示し、`戻す` が何を作り直すかを書く
+
 ---
 
 ## 18. 受入基準と配布物テストケースの対応
@@ -648,6 +760,10 @@ common.md §3 の宣言。
 | AC-22 | (机上評価。`docs/test/slide-studio.md`) |
 | AC-23 | S03 / S04 / S05 |
 | AC-24 | S06 |
+| AC-25 | L01 / L02 |
+| AC-26 | L03 / L04 |
+| AC-27 | N01 / N02 / N03 |
+| AC-28 | N04 / N05 |
 
 **静的検査の合格をもって A / T / B の合格としない** (I-11)。実行環境で走らせていない場合、会話動作を検証済みと記録しない。
 
@@ -673,6 +789,10 @@ common.md §3 の宣言。
 - [ ] `domain-guide.md` に私用文字が無く、見出し番号 §1〜§7 がある
 - [ ] `src/` からリポジトリ内部のパスを参照していない (common.md CINV-02)
 - [ ] 実行できていないことを実行済みと書く表現が入っていない
+- [ ] 作業言語と成果物の声の分離が `SKILL.md` と §13.11 の表の各 Context に残っている
+- [ ] `deliverable_voice` が `brief-normalizer` の出力スキーマにあり、適用先の Context が印を持つ
+- [ ] 「次にすること」ブロックが `SKILL.md` の結果形式と Router の手順に残っている
+- [ ] `SAMPLES.md` の例が `SKILL.md` / `REGISTRY.md` / Context ファイルと矛盾しない
 
 ---
 
@@ -699,12 +819,14 @@ common.md §3 の宣言。
 - 出力形式の既定、テンプレート必須、画像の扱い、コード実行無し時の挙動の変更
 - 承認規則 (Reviewer PASS / 人間承認 / Validator 非代替) の変更
 - ガイドの本文変更、ガイドの同梱方法の変更
+- 作業言語と成果物の声の分離 (§13.11) の適用範囲の変更
+- 結果ブロックと「次にすること」の構成 (§7 / §13.12) の変更
 
 **実装変更** (spec を変えずに実施してよい)
 
 - Context ファイルの文面改善 (責務・入出力・判定を変えない範囲)、`SKILL.md` の章構成変更
 - Artifact スキーマの項目追加 (既存項目の意味を変えない範囲)
-- README / CHANGELOG / test-cases の整理
+- README / CHANGELOG / test-cases / SAMPLES の整理 (例の追加・文面改善。仕様と矛盾しない範囲)
 - 同じ効果を持つ起動設定への変更
 
 ---
@@ -719,7 +841,7 @@ common.md §3 の宣言。
 6. `references/contexts/<stage>/<context>.md`
 7. `agents/openai.yaml`
 8. `references/test-cases.md`
-9. `README.md` / `CHANGELOG.md`
+9. `README.md` / `CHANGELOG.md` / `SAMPLES.md`
 
 `references/domain-guide.md` はこの序列に入らない。ドメイン知識の正本として §4 の分担に従い、本 spec と矛盾するときは人間へ判断を求める。
 
@@ -729,4 +851,4 @@ common.md §3 の宣言。
 
 本 Skill を保守する際、最優先する原則は次の 1 文とする。
 
-> **明示起動されたときだけ、1 回の操作で 1 つの専門 Context を実行し、生成と検証を分け、FAIL は問題を生成した最小の上流へ差し戻して止まる。内容を先に装飾を後に、固定値を法則にせず、実行していないことを実行済みと言わない。**
+> **明示起動されたときだけ、1 回の操作で 1 つの専門 Context を実行し、生成と検証を分け、FAIL は問題を生成した最小の上流へ差し戻して止まる。内容を先に装飾を後に、固定値を法則にせず、実行していないことを実行済みと言わない。作業の記録は作業言語で書き、次に打てる操作を示してターンを終える。**

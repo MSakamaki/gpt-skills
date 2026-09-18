@@ -29,10 +29,11 @@
 | 6 | 字幕要件が `accessibility_policy` の字幕方針と整合するか。字幕を「冗長」として省いていないか | ガイド §3「字幕と冗長性原理は区別する」 |
 | 7 | ノートへの転記が計画の方針どおりか (求められていないのに転記、求められているのに未転記) | `delivery_artifact_plan` |
 | 8 | `verification` と `download` が正直か。ファイルを作っていないのに作ったと書いていないか | 実行していないことを書かない |
+| 9 | 聴衆が読む文字列 (Handout の補足、トランスクリプト、字幕) が `deliverable_voice` に従い、記録欄が作業言語のままか | I-15 |
 
 ## 判定
 
-- 観点 1・2・4・8 は `CRITICAL`。観点 3・5〜7 は `MAJOR`
+- 観点 1・2・4・8 は `CRITICAL`。観点 3・5〜7・9 は `MAJOR`
 - `CRITICAL` / `MAJOR` が 1 つでもあれば `FAIL`。`MINOR` だけなら `PASS`
 
 | 問題の種類 | rollback_target |

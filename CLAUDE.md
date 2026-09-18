@@ -82,7 +82,7 @@ PDF の同梱条件は [docs/spec/adversarial-answer.md](docs/spec/adversarial-a
 
 ## slide-studio を触る前に読む
 
-正本は [docs/spec/slide-studio.md](docs/spec/slide-studio.md)。1 Skill の中に 69 の専門 Context (Designer 32 / Reviewer 32 / Validator 4 / Navigator 1) を持つ Context Router 型の Skill で、**§6 の不変条件 (I-01〜14) と §8 の Context 契約に触れる変更は仕様変更として扱う** (spec §21)。特に次を勝手に変えない。
+正本は [docs/spec/slide-studio.md](docs/spec/slide-studio.md)。1 Skill の中に 69 の専門 Context (Designer 32 / Reviewer 32 / Validator 4 / Navigator 1) を持つ Context Router 型の Skill で、**§6 の不変条件 (I-01〜16) と §8 の Context 契約に触れる変更は仕様変更として扱う** (spec §21)。特に次を勝手に変えない。
 
 - 1 Turn = 1 Specialist Context — 人間の操作なしに次 Context へ進む経路を追加しない。「全部やって」でも 1 つだけ実行する
 - Reviewer は修正しない。FAIL は rollback_target を示して止まる。自動修復して PASS にする経路を作らない
@@ -90,10 +90,12 @@ PDF の同梱条件は [docs/spec/adversarial-answer.md](docs/spec/adversarial-a
 - 出力は PPTX 既定・テンプレート必須・画像は別 Skill で作りユーザーがはめ込む・コード実行が無ければ Build 系は BLOCKED。これらは 2026-09-19 のユーザー決定 (spec §13.5)
 - `references/domain-guide.md` の本文を変えない (spec §13.6)。引用マーカーの置換・見出し番号・冒頭注記・付録以外は元原稿とバイト一致していなければならない
 - 固定値 (枚数・pt・色数・時間) を規則として書かない (I-09)。ガイドの根拠レベル A/B/C/D を崩さない
+- 作業言語と成果物の声を混ぜない (I-15)。対象読者向けのトーン・表記の指定は `deliverable_voice` に記録し、聴衆が読む文字列だけに適用する。Artifact の記述・所見・案内は常に日本語の常体
+- 各ターンを「次にすること」で終える (I-16)。結果ブロックだけ返して終える形へ戻さない
 
 秘密情報スキャンは、Artifact 参照 `slide_assertion_spec@S03.assertion` のような `名前@S<nn>.項目` をメールアドレスから除外している (`tools/scan-secrets.mjs`)。この形式以外の `@` を含む例を書くときは誤検知を疑う前に内容を確認する。
 
-変更したら [docs/test/slide-studio.md](docs/test/slide-studio.md) の受入基準 (AC-01〜24) を読み直し、根拠列が成立するかを確認して結果を更新する。
+変更したら [docs/test/slide-studio.md](docs/test/slide-studio.md) の受入基準 (AC-01〜28) を読み直し、根拠列が成立するかを確認して結果を更新する。実地検証で問題が見つかったら、同書の「実地検証で見つかった問題」へ追記し、spec のどの節を変えたかを残す。
 
 ## adversarial-answer を触る前に読む
 
@@ -122,7 +124,8 @@ PDF の同梱条件は [docs/spec/adversarial-answer.md](docs/spec/adversarial-a
 | `slide-studio` の Context 一覧・入出力・遷移・差し戻し先 | `src/slide-studio/references/REGISTRY.md` |
 | `slide-studio` の各 Context の手順 | `src/slide-studio/references/contexts/<stage>/<context>.md` |
 | `slide-studio` のドメイン知識 (スライド設計の科学的根拠) | `src/slide-studio/references/domain-guide.md` |
-| `slide-studio` の確認ケース (A / T / B / S) | `src/slide-studio/references/test-cases.md` |
+| `slide-studio` の確認ケース (A / T / B / L / N / S) | `src/slide-studio/references/test-cases.md` |
+| `slide-studio` のターンの並びの例 | `src/slide-studio/SAMPLES.md` (実行時には読まない) |
 | 覆してはいけない決定 (D1〜D10) | [docs/handoff.md](docs/handoff.md) §3 |
 
 **spec と実装が矛盾する場合、spec を優先する。** 実装だけを変えて spec と食い違わせてはならない。変更手順と完了条件は `docs/spec/common.md` §4 / §5 が正本。

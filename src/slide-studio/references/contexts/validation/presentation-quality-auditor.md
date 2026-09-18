@@ -14,7 +14,7 @@ Deck 全体を横断的に評価する。局所 Reviewer がすべて PASS し�
 
 ## 入力
 
-`delivery_artifacts` (評価対象。読めなければ build の記録) ／ `presentation_brief` `success_criteria` (目的・成功条件) ／ `audience_profile` `presentation_mode_spec` (情報密度・用語、Mode・interaction) ／ `deck_outline` `slide_sequence_plan` (ストーリー、Slide の役割・順序・内容モデル) ／ `speaker_track@*` `animation_spec@*` (ナレーションの分担、Animation の目的と `sync_points`)
+`delivery_artifacts` (評価対象。読めなければ build の記録) ／ `presentation_brief` `success_criteria` (目的・成功条件・`deliverable_voice`) ／ `audience_profile` `presentation_mode_spec` (情報密度・用語、Mode・interaction) ／ `deck_outline` `slide_sequence_plan` (ストーリー、Slide の役割・順序・内容モデル) ／ `speaker_track@*` `animation_spec@*` (ナレーションの分担、Animation の目的と `sync_points`)
 
 ## 確認観点
 
@@ -36,12 +36,13 @@ Deck 全体を横断的に評価する。局所 Reviewer がすべて PASS し�
 | 12 | 学習確認 | Workshop / 研修なら、説明の後に思い出す・使う機会が構造にある |
 | 13 | Mode の一貫性 | Mode と各 Slide の情報密度・進行・interaction・author/participant-driven の配分が整合する |
 | 14 | 認知負荷 | 聴衆の専門性に対して過多でも過少でもない (expertise reversal)。「常に少ないほどよい」とは判定しない |
+| 15 | 成果物の声 | 聴衆が読む・聞く文字列が `presentation_brief.deliverable_voice` の言語・表記・トーン・読解水準で一貫する。Slide ごとに声がぶれていない。逆に Artifact の記述・所見が作業言語のまま (I-15) |
 
 優先順位は「理解 > アクセシビリティ > 正確性 > 視線誘導 > 美観 > 装飾」。美観のために情報構造やコントラストが犠牲になっていれば違反とする。
 
 ## 判定
 
-- 観点 1・2・4・11 は `CRITICAL`。観点 3・5〜10・12〜14 は `MAJOR`。局所的で理解に影響しないものは `MINOR`
+- 観点 1・2・4・11 は `CRITICAL`。観点 3・5〜10・12〜15 は `MAJOR`。局所的で理解に影響しないものは `MINOR`
 - `CRITICAL` / `MAJOR` が 1 つでもあれば `FAIL`。評価できない観点が残れば `PASS` にせず `unverified` に残して `BLOCKED`。すべて評価でき問題が無いときだけ `PASS` → `recommended_next: presentation-preflight-reviewer`
 - 差し戻しは原因 Context へ (`<upstream>`)。複数あれば最上流を結果ブロックの `rollback_target` にし、残りを `issues` に列挙する
 
