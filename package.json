@@ -14,6 +14,7 @@
     "scan": "node tools/scan-secrets.mjs",
     "scan:staged": "node tools/scan-secrets.mjs --staged",
     "scan:selftest": "node tools/scan-secrets.mjs --selftest",
+    "contracts": "node tools/check-spec-contracts.mjs",
     "hooks:install": "node tools/install-hooks.mjs",
     "prepare": "node tools/install-hooks.mjs"
   },

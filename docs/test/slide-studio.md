@@ -1,12 +1,12 @@
 # slide-studio — 受入基準の評価
 
-[docs/spec/slide-studio.md](../spec/slide-studio.md) §17 受入基準 (AC-01〜28) の評価結果。
+[docs/spec/slide-studio.md](../spec/slide-studio.md) §17 受入基準 (AC-01〜31) の評価結果。
 
 **評価の性質**: これは `SKILL.md` ほか配布物の記述が spec の要求を満たすかを読み合わせた**机上評価**と、Registry・ガイド・ZIP に対する**静的検査**の結果であり、ChatGPT / Codex 上で実際に走らせた結果ではない。判定 `PASS` は「spec の要求に対応する指示が配布物に存在する (静的検査項目は機械的に確認できた)」という意味で、**実行時にそのとおり振る舞うことを保証しない** (spec I-11 / common.md CINV-05)。本番環境での確認は別途必要。
 
-評価日: 2026-09-19 / 対象: `src/slide-studio/` v1.1.0 (`dist/slide-studio/skill.zip` sha256 `0e409a7f6573613a53e0e38aeb68ab38c49b471560996c5a54ef409a9da166a0`、78 ファイル、展開時 428.8KB、ZIP 209.3KB)
+評価日: 2026-09-19 / 対象: `src/slide-studio/` v1.2.0 (`dist/slide-studio/skill.zip` sha256 `7eadf43361912053fa88d647f67aef7d308c0baae10e216f460d75b1cac0b1b2`、78 ファイル、展開時 448.1KB、ZIP 215.6KB)
 
-v1.0.0 の評価は同日に行い、AC-01〜24 が PASS だった。その後の実地検証で 3 件の問題が見つかり、v1.1.0 で是正した (下の「実地検証で見つかった問題」)。本書は v1.1.0 に対する再評価である。
+v1.0.0 の評価は同日に行い、AC-01〜24 が PASS だった。その後の実地検証で 3 件の問題が見つかり、v1.1.0 で是正した。ターン末の案内はさらに v1.2.0 で選択式へ変えた (下の「実地検証で見つかった問題」)。本書は v1.2.0 に対する再評価である。
 
 ---
 
@@ -40,28 +40,32 @@ v1.0.0 の評価は同日に行い、AC-01〜24 が PASS だった。その後�
 | AC-24 ガイド本文の保存 (静的) | PASS | 変換スクリプトの照合: 置換 92 群・見出し番号 7 件・冒頭注記・付録を除いた本文が元原稿とバイト一致。私用文字の残存 0 |
 | AC-25 成果物の声を作業の記録へ適用しない | PASS | `SKILL.md`「作業言語と成果物の声」の表 + I-15 + `brief-normalizer.md` 禁止「依頼のトーン・表記の指定に本 Artifact の書き方を合わせない」+ `audience-analyzer.md` 禁止 + 両 Reviewer の観点 (CRITICAL) |
 | AC-26 成果物の声を聴衆が読む文字列へ適用する | PASS | `brief-normalizer.md` の `deliverable_voice` スキーマ + `slide-copywriter` / `speaker-track-designer` / `activity-slide-designer` / `delivery-variant-builder` の出力スキーマの `[成果物の声]` 印と適用手順 + 各 Reviewer の観点 |
-| AC-27 各ターンが次の操作を示して終わる | PASS | `SKILL.md`「次にすること (毎ターン必須)」の形式・規則・例 + I-16 + Router の手順 7 +「Router がやってはならないこと」に省略の禁止 + `workflow-navigator.md` の案内節 |
-| AC-28 止まった理由と解き方を示す | PASS | `SKILL.md`「次にすること」の `FAIL` / `BLOCKED` の例と規則 + `workflow-navigator.md`「止まっている工程があるときは、その原因を作業の言葉で 1 行にする」 |
+| AC-27 各ターンが選択式で次の操作を示して終わる | PASS | `SKILL.md`「次にすること (毎ターン必須)」の形式節 (`A` から始まる記号、推奨は `A`、末尾に `9`、答え方の 1 行) + I-16 + Router の手順 7 +「Router がやってはならないこと」に省略の禁止 + `workflow-navigator.md` の案内節 |
+| AC-28 止まった理由と解き方を示す | PASS | `SKILL.md`「FAIL のとき」「BLOCKED のとき」の規則と例 (所見を選択肢より先に、渡す操作を `A` にしてよい) + `workflow-navigator.md`「止まっている工程があるときは、その原因を作業の言葉で 1 行にする」 |
+| AC-29 選択肢に 4 観点を書く | PASS | `SKILL.md`「説明の深さ」の表と、行数で決めない旨・初出は厚く再出は薄く・30 行超は `9` へ回す規定 + `SAMPLES.md` が初出と再出で厚みを変えた例を持つ |
+| AC-30 記号の解釈が安定している | PASS | `SKILL.md`「回答の解釈」の表 (`A`/`a`/`Ａ`、`9`、`0`、自由入力、提示が無いときの裸の記号) +「実行前に何を選んだと解釈したかを 1 行返す」+「ユーザー操作の解釈」表の記号 3 行 + `SAMPLES.md` §5 |
+| AC-31 継承元の変更を検出できる | PASS | `tools/check-spec-contracts.mjs` + spec §13.14 の契約依存の表 + `guided-clarification.md` のマーカー。継承元を 1 箇所変更して ERROR と実際のハッシュが出ることを実行して確認した |
 
-28 件すべて PASS。**spec の要求に対して配布物へ加えるべき不足は見つからなかった。** 読み合わせで見つけた Registry と Context ファイルの不整合 (Reviewer が requires 外で読んでいた Artifact、`sync_points` の id、項目名の対応) は spec §13.7 / §13.8 へ記録したうえで是正済み。
+31 件すべて PASS。**spec の要求に対して配布物へ加えるべき不足は見つからなかった。** 読み合わせで見つけた Registry と Context ファイルの不整合 (Reviewer が requires 外で読んでいた Artifact、`sync_points` の id、項目名の対応) は spec §13.7 / §13.8 へ記録したうえで是正済み。
 
 ---
 
-## 実地検証で見つかった問題 (v1.0.0 → v1.1.0)
+## 実地検証で見つかった問題
 
-ChatGPT 上で v1.0.0 を走らせて見つかった 3 件。いずれも spec を先に更新してから実装へ反映した。
+ChatGPT 上で v1.0.0 を走らせて見つかった 3 件と、その是正を読み直して見つけた 1 件。いずれも spec を先に更新してから実装へ反映した。F-01〜F-03 は v1.1.0、F-04 は v1.2.0 で是正している。
 
 | # | 観測された振る舞い | 原因 | 是正 |
 |---|---|---|---|
 | F-01 | 「対象者は幼稚園児、トーンは明るく楽しくひらがなで」と依頼したところ、`audience_profile` の分析文までひらがなになり、作業の記録が読みにくくなった | 成果物のトーン指定と作業の記述に境界が無かった。`presentation_brief` は `constraints.language` しか持たず、トーン・表記・読解水準の置き場が無かった | DP-07 / I-15 を追加。`deliverable_voice` を `presentation_brief` へ追加し、適用先を「聴衆が読む・聞く文字列」に限定。Context の出力スキーマへ `[成果物の声]` の印を付け、8 つの Context と 6 つの Reviewer に規定と観点を追加 (spec §13.11) |
 | F-02 | `次へ` で工程が切り替わったとき、現在の状況は出るが「利用者が何をすればよいか」「何が問題か」「何ができるか」が案内されず作業が止まった | 結果ブロックは `recommended_next` を持つが、それは Context 名であって操作ではない。ターン末に利用者向けの案内を置く規定が無かった | DP-08 / I-16 を追加。結果ブロックの直後に「次にすること」を必須化し、形式・規則・`FAIL` と `BLOCKED` の書き方を `SKILL.md` に規定。`workflow-navigator` の案内も操作へ翻訳する形へ変更 (spec §13.12) |
 | F-03 | 操作の型が文章の規定だけでは伝わらなかった | 実物のターンの並びを示す資料が無かった | `SAMPLES.md` を追加。通しの進行と、FAIL・BLOCKED・状況確認・人間承認・言語分離・内容モデルの分岐を実物の形で示す。実行時には読まない (spec §13.13) |
+| F-04 | 1 行の案内でも、利用者は操作を自分で組み立てる必要があった | 操作を列挙するだけで、選ばせる形になっていなかった | ターン末を選択式へ変更 (v1.2.0)。記号はアルファベットにして Slide 番号との衝突を避け、`0` は使わず、`9` で深掘りし、各選択肢に 4 観点を書く。`guided-clarification` とは継承ではなく参照として整理し、継承元の変更を検出する仕組みを入れた (spec §13.12 / §13.14) |
 
-F-01 と F-02 は spec §6 の不変条件と §7 の出力形式に関わるため、実装だけの変更ではなく仕様変更として扱った。
+F-01・F-02・F-04 は spec §6 の不変条件と §7 の出力形式に関わるため、実装だけの変更ではなく仕様変更として扱った。
 
 ---
 
-## 静的検査の結果 (test-cases.md S01〜S11)
+## 静的検査の結果 (test-cases.md S01〜S12)
 
 | ID | 結果 | 方法 |
 |---|---|---|
@@ -74,8 +78,9 @@ F-01 と F-02 は spec §6 の不変条件と §7 の出力形式に関わるた
 | S07 受入テストの遷移 | PASS | Registry を辿る検査スクリプト (Case 1 / 2 / 3 / 5 / 8 / 9 / 10 / B01) |
 | S08 配布 ZIP | PASS | `npm run check` の verify-package (ZIP 内の Registry 検査・内部参照 235 件・SKILL.md 1 つ) |
 | S09 言語分離の記述 | PASS | `SKILL.md` の表と I-15、`brief-normalizer` の `deliverable_voice`、`[成果物の声]` の印を 4 つの Context の出力スキーマで確認 |
-| S10 案内の記述 | PASS | `SKILL.md`「次にすること (毎ターン必須)」、Router の手順 7、`workflow-navigator.md` の案内節 |
-| S11 SAMPLES.md | PASS | 使用している Context 名 27 件すべてが Registry に存在。Artifact 名・Status・遷移が Registry と一致 |
+| S10 案内の記述 | PASS | `SKILL.md`「次にすること (毎ターン必須)」の形式・説明の深さ・回答の解釈、Router の手順 7、`workflow-navigator.md` の案内節 |
+| S11 SAMPLES.md | PASS | 使用している Context 名が Registry に存在。Artifact 名・Status・遷移が Registry と一致。全 13 の案内が `A` から始まり `9` で終わる |
+| S12 契約依存 | PASS | `npm run check` の spec-contracts。定義 1・宣言 2 で一致。継承元を変更すると 2 件の ERROR が出ることを実行して確認した |
 
 ---
 
@@ -99,7 +104,11 @@ F-01 と F-02 は spec §6 の不変条件と §7 の出力形式に関わるた
 - [x] 実行できていないことを実行済みと書く表現が入っていない — 各 Renderer / Builder の `preview: not_rendered` と `verification`、README「検証状況」、CHANGELOG「検証の区別」
 - [x] 作業言語と成果物の声の分離が `SKILL.md` と spec §13.11 の表の各 Context に残っている
 - [x] `deliverable_voice` が `brief-normalizer` の出力スキーマにあり、適用先の Context が `[成果物の声]` の印を持つ
-- [x] 「次にすること」ブロックが `SKILL.md` の結果形式と Router の手順に残っている
+- [x] 選択式の「次にすること」が `SKILL.md` の結果形式と Router の手順に残っている
+- [x] 選択肢の記号がアルファベットで、`0` を使わず、`9` の意味が変わっていない
+- [x] 4 観点の規定が残り、行数による下限が入っていない
+- [x] 実行前に解釈を 1 行返す規定が残っている
+- [x] §13.14 の契約依存が `npm run check` で照合され、共通と書いた 5 項目が継承元でまだ成立している
 - [x] `SAMPLES.md` の例が `SKILL.md` / `REGISTRY.md` / Context ファイルと矛盾しない
 
 ---
@@ -112,7 +121,7 @@ F-01 と F-02 は spec §6 の不変条件と §7 の出力形式に関わるた
 | 同 T01〜T16 (Router と Turn) | **未実施** | 同上。特に「全部やって」で 1 Context に留まるか、`次へ` で 1 つだけ進むかは実行環境で確認する |
 | 同 B01〜B09 (Build と実行環境) | **未実施** | PPTX テンプレートとコード実行のある環境で、実ファイルの生成・BLOCKED の挙動・プレビュー未生成時の記録を確認する |
 | 同 L01〜L07 (言語とトーン) | **未実施** | v1.1.0 の是正が実行時に効くかは再検証が必要。F-01 を再現する入力 (幼稚園児・ひらがな) で `audience_profile` が作業言語のままか確認する |
-| 同 N01〜N07 (ターン末の案内) | **未実施** | F-02 を再現する操作 (`次へ` で工程を切り替える) で、次の操作が案内されるか確認する |
+| 同 N01〜N15 (ターン末の案内) | **未実施** | F-02 と F-04 を再現する操作で、選択式の案内が出るか、記号 1 文字で進めるか、`9` と `0` が規定どおりかを確認する |
 | Progressive Loading | **未実施** | `SKILL.md` から `REGISTRY.md` と Context ファイル 1 本だけが読み込まれるか。毎 Turn の読込量は `SKILL.md` 22.2KB + `REGISTRY.md` 22.3KB + Context 2.4〜6.4KB + ガイドの指定節 |
 | 同 S01〜S08 (静的検査) | 実施 | 上表 |
 

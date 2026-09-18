@@ -76,7 +76,19 @@ PDF の同梱条件は [docs/spec/adversarial-answer.md](docs/spec/adversarial-a
 - 文字量以外の質問を 3 択へ水増ししない。`0` は直前の論点だけの委任、`9` は同じ論点の再質問
 - 実行していないことを実行済みと書かない (画像を生成していないのに品質を「検証済み」と記録しない)
 
-選択式確認の判定規則は [docs/spec/guided-clarification.md](docs/spec/guided-clarification.md) §6〜§12 を継承し、差分だけを slide-visual spec §12.2 に置いてある。**継承元を変更したら差分表が成立するかを必ず点検する。** 配布物は別 Skill に依存しない (実装は `SKILL.md` 単体で完結させる)。
+選択式確認の判定規則は [docs/spec/guided-clarification.md](docs/spec/guided-clarification.md) §6〜§12 を継承し、差分だけを slide-visual spec §12.2 に置いてある。**継承元を変更したら差分表が成立するかを必ず点検する。** 点検漏れは `npm run check` が検出する (次節)。配布物は別 Skill に依存しない (実装は `SKILL.md` 単体で完結させる)。
+
+## spec 間の契約依存
+
+`docs/spec/guided-clarification.md` の §6〜§12 は契約 `CLARIFY-CONTRACT` で、`slide-visual` が継承、`slide-studio` が参照している。範囲は HTML コメントで囲んであり、依存側の spec が版と SHA256 を「契約依存」の表で宣言する。`npm run check` の `spec-contracts` が照合し、不一致を ERROR にする。
+
+**不一致は「継承元が変わった」という意味であり、ハッシュを書き換えれば直るものではない。** 継承元の変更を読み、依存側の差分表 (slide-visual §12.2) と共通項目 (slide-studio §13.14) がまだ成立するかを確認してから、出力された実際のハッシュを宣言へ書き写す。確認結果は `docs/test/<skill-name>.md` へ残す。自動更新の手段は用意していない。
+
+契約範囲そのものを変えるときは、`guided-clarification.md` のマーカーの版を上げる。依存側は版の不一致で気づく。
+
+```bash
+npm run contracts    # 照合だけを単独で実行する
+```
 
 変更したら [docs/test/slide-visual.md](docs/test/slide-visual.md) の受入基準 (AC-01〜22) を読み直し、根拠列が成立するかを確認して結果を更新する。
 
@@ -91,7 +103,8 @@ PDF の同梱条件は [docs/spec/adversarial-answer.md](docs/spec/adversarial-a
 - `references/domain-guide.md` の本文を変えない (spec §13.6)。引用マーカーの置換・見出し番号・冒頭注記・付録以外は元原稿とバイト一致していなければならない
 - 固定値 (枚数・pt・色数・時間) を規則として書かない (I-09)。ガイドの根拠レベル A/B/C/D を崩さない
 - 作業言語と成果物の声を混ぜない (I-15)。対象読者向けのトーン・表記の指定は `deliverable_voice` に記録し、聴衆が読む文字列だけに適用する。Artifact の記述・所見・案内は常に日本語の常体
-- 各ターンを「次にすること」で終える (I-16)。結果ブロックだけ返して終える形へ戻さない
+- 各ターンを選択式の「次にすること」で終える (I-16)。結果ブロックだけ返して終える形へ戻さない。選択肢の記号はアルファベット (数字は Slide 番号と紛れる)、`0` は使わない、`9` は深掘り、推奨は常に `A`、説明は 4 観点で行数では規定しない
+- `guided-clarification` とは**継承ではなく参照**の関係にする (spec §13.14)。この Skill の選択式の変更を `slide-visual` へ持ち込まない
 
 秘密情報スキャンは、Artifact 参照 `slide_assertion_spec@S03.assertion` のような `名前@S<nn>.項目` をメールアドレスから除外している (`tools/scan-secrets.mjs`)。この形式以外の `@` を含む例を書くときは誤検知を疑う前に内容を確認する。
 

@@ -69,7 +69,8 @@ src/adversarial-answer/          ← ディレクトリ名 = SKILL.md の name
 
 ```bash
 npm install
-npm run check             # scan + build (strict) + verify。リリース前はこれを使う
+npm run check             # scan + spec-contracts + build (strict) + verify。リリース前はこれを使う
+npm run contracts         # spec 間の契約依存だけを照合する
 npm run validate          # 構造検証 (v2 成果物の欠落は WARN)
 npm run validate:strict   # v2 成果物の欠落を ERROR にする
 npm run build             # 検証したうえで dist/<skill>/skill.zip を生成
@@ -107,6 +108,8 @@ node tools/pdftext.mjs <file.pdf> [from] [to]    # 指定ページのテキス�
 - `REFERENCE-MANIFEST.md` と実体の整合 — SHA256・ファイルサイズ・`Bundled` と実体の有無・未登録 PDF の検出
 - `references/REGISTRY.md` を持つ Skill では、Context Registry の閉包 (全 `next` / `rollback_candidates` が Context か定義済みトークン、全 `requires` が生成・外部入力・派生のいずれか)、Designer / Reviewer の対 (I-04)、Registry の行と `references/contexts/<stage>/<context>.md` の 1 対 1 対応と見出し・種別の一致 ([docs/spec/slide-studio.md](docs/spec/slide-studio.md) §13.4)
 - Skill 合計サイズ (20MB で WARN / 25MB で ERROR)
+
+`tools/check-spec-contracts.mjs` は `docs/spec/` の spec 間の依存を検査する。ある spec の一部を別の spec が継承・参照するとき、継承元の変更に依存側が気づけないと、世代が離れたまま両者が食い違う。継承元は契約とする範囲を HTML コメントで囲み、依存側は版と SHA256 を「契約依存」の表で宣言する。不一致は ERROR になり、実際のハッシュと復旧手順を出す。考え方は `REFERENCE-MANIFEST.md` の SHA256 照合と同じで、対象が PDF ではなく spec の一部という違いしかない。自動更新の手段は用意していない。確認せずに通す抜け道を作らないため。
 
 `tools/verify-package.mjs` は生成済みの `dist/<skill>/skill.zip` 自体を検査する。ZIP 内 PDF の SHA256 を ZIP 内 Manifest と照合し、開発用ファイルの混入と `Bundled: NO` の PDF の混入を検出する。Registry を持つ Skill では、ZIP 内でも同じ Registry 検査を行う。
 

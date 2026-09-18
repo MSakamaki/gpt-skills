@@ -256,6 +256,10 @@ AIに任せる
 
 ---
 
+> **§6〜§12 は契約 `CLARIFY-CONTRACT v1` である。** 他の Skill の spec がこの範囲を継承・参照し、`tools/check-spec-contracts.mjs` が本文の SHA256 を照合する。**この範囲を変更したら版を上げ、依存する spec を点検する。** 依存側は `npm run check` が失敗することで変更に気づく。現在の依存は [slide-visual.md](slide-visual.md) §12.1 (継承) と [slide-studio.md](slide-studio.md) §13.14 (参照)。
+
+<!-- contract: CLARIFY-CONTRACT v1 begin -->
+
 ## 6. 質問判定仕様
 
 ## 6.1 質問を行う条件
@@ -460,6 +464,8 @@ AIがユーザーの政治的判断を代行すべきでない場合、実質的
 であることを簡潔に説明する。
 
 ---
+
+<!-- contract: CLARIFY-CONTRACT v1 end -->
 
 ## 13. 状態モデル
 
