@@ -1,6 +1,6 @@
 # adversarial-answer v2 — 引き継ぎ
 
-最終更新: 2026-09-18 (Skill `slide-visual` の追加に伴いリポジトリ構成の記述を更新)
+最終更新: 2026-09-19 (Skill `slide-studio` の追加に伴いリポジトリ構成と検証条件の記述を更新)
 
 改訂履歴は [handoff-history.md](handoff-history.md) に分離している。本書は常に「現在の状態と次にやること」だけを書き、過去の経緯は履歴側へ移す。
 
@@ -44,6 +44,7 @@ gpt-skills/                          ← リポジトリルート (D:\gpt-skills
 ├── src/
 │   ├── adversarial-answer/          本書が対象とする Skill
 │   ├── guided-clarification/        2026-09-16 にユーザーが追加。3 ファイル / 8.7KB
+│   ├── slide-studio/                2026-09-19 に追加。Context Router 型。77 ファイル / 約 390KB
 │   └── slide-visual/                2026-09-18 にユーザーが追加。6 ファイル / 44.5KB
 ├── tools/      node 製の検証・ビルド・PDF 調査ツール (配布対象外)
 ├── docs/       配布対象外
@@ -59,7 +60,7 @@ gpt-skills/                          ← リポジトリルート (D:\gpt-skills
     └── <skill-name>/skill.zip       (git 管理外)
 ```
 
-**本書 (`handoff.md`) は `adversarial-answer` の引き継ぎであり、`guided-clarification` と `slide-visual` は対象外。** どちらもユーザーが作成した独立の Skill で、仕様は [spec/guided-clarification.md](spec/guided-clarification.md) と [spec/slide-visual.md](spec/slide-visual.md) が持つ (受入基準の評価結果は `docs/test/<skill-name>.md`)。`slide-visual` は `references/test-cases.md` を持つが、`adversarial-answer` の v2 成果物 (Method Card / Manifest / Router テスト) とは無関係で、検証条件も変わらない。
+**本書 (`handoff.md`) は `adversarial-answer` の引き継ぎであり、`guided-clarification` `slide-visual` `slide-studio` は対象外。** いずれも独立の Skill で、仕様は [spec/guided-clarification.md](spec/guided-clarification.md)、[spec/slide-visual.md](spec/slide-visual.md)、[spec/slide-studio.md](spec/slide-studio.md) が持つ (受入基準の評価結果は `docs/test/<skill-name>.md`)。`slide-visual` は `references/test-cases.md` を、`slide-studio` は `references/REGISTRY.md` と `references/contexts/` を持つが、`adversarial-answer` の v2 成果物 (Method Card / Manifest / Router テスト) とは無関係で、この Skill の検証条件は変わらない。
 
 ```bash
 npm install
@@ -70,7 +71,7 @@ node tools/pdfinfo.mjs <file.pdf>         # タイトル・著者・ライセン
 node tools/pdftext.mjs <file.pdf> 1 3     # 指定ページのテキスト
 ```
 
-検証は `SKILL.md` と `agents/openai.yaml` だけを全 Skill 共通の必須とし、`references/methods/` または `METHOD-ROUTING.md` を持つ Skill にだけ Method Card と Manifest の完全性を要求する。`adversarial-answer` 以外の Skill を追加しても、この Skill の検証条件は変わらない。
+検証は `SKILL.md` と `agents/openai.yaml` だけを全 Skill 共通の必須とし、`references/methods/` または `METHOD-ROUTING.md` を持つ Skill にだけ Method Card と Manifest の完全性を要求する。`references/REGISTRY.md` を持つ Skill (`slide-studio`) には Context Registry の整合検査が加わるが、`adversarial-answer` の検証条件は変わらない。
 
 ---
 

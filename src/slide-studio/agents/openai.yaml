@@ -1,0 +1,14 @@
+interface:
+  display_name: スライド作成スタジオ
+  short_description: 明示起動で、目的・聴衆から1工程ずつ設計とレビューを分けて進め、PPTXテンプレートへ組み上げます。1回の操作で1工程だけ実行します。
+  default_prompt: $slide-studio を使い、workflow-navigator から始めてください。
+  brand_color: '#1E3A5F'
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  allow_implicit_invocation: false
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas

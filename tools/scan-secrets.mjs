@@ -49,6 +49,13 @@ const isGenericUser = (name) =>
 const ALLOWED_EMAIL =
   /@(?:example\.(?:com|org|net|jp)|test\.invalid|localhost|users\.noreply\.github\.com)$|^(?:noreply|no-reply|support|info)@(?:anthropic|openai|github|npmjs)\.com$/i;
 
+/**
+ * slide-studio の Artifact 参照 (`slide_assertion_spec@S03.assertion` のように
+ * snake_case の Artifact 名 + `@S<slide番号>` + `.項目`)。メールアドレスの形に似るが秘密ではない。
+ * `@` の直後のラベルが `S` + 数字だけのものに限って除外する。
+ */
+const ARTIFACT_REF = /^[a-z][a-z0-9_]*@S\d*(?:\.[A-Za-z0-9-]+)+$/;
+
 const RULES = [
   // --- 1. トークン・鍵 -----------------------------------------------------
   {
@@ -127,7 +134,7 @@ const RULES = [
     id: 'email',
     desc: 'メールアドレス',
     re: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+\b/g,
-    filter: (m) => !ALLOWED_EMAIL.test(m),
+    filter: (m) => !ALLOWED_EMAIL.test(m) && !ARTIFACT_REF.test(m),
   },
   {
     id: 'windows-user-path',
@@ -342,6 +349,7 @@ function selftest() {
     ['url-basic-auth', J('https://deploy:', 'hunter2pass', '@internal.example/repo.git')], // secrets-scan-allow
     ['generic-secret-assignment', J('client_secret', ' = "', 'Gx9-qp2LmT4vR8sd1', '"')], // secrets-scan-allow
     ['email', 'contact: ' + J('taro.yamada', '@', 'somecorp.co.jp')], // secrets-scan-allow
+    ['email', 'mail: ' + J('hanako_sato', '@', 'S1ales.co.jp')], // secrets-scan-allow  (Artifact 参照の除外を通り抜けないこと)
     ['windows-user-path', 'C:' + B + 'Users' + B + 'sato' + B + 'AppData'], // secrets-scan-allow
     ['unix-home-path', 'path = ' + J('/home/', 'tanaka', '/work')], // secrets-scan-allow
   ];
@@ -356,6 +364,8 @@ function selftest() {
     'cd D:' + B + 'gpt-skills',
     'npm run check -- --skill=adversarial-answer',
     '- Local Path: references/papers/core/adversarial-review-2608.18167.pdf',
+    // slide-studio の Artifact 参照。メールアドレスではない
+    'inputs_used: slide_sequence_item@S03.purpose / speaker_track@S.interpretation / slide_evidence_pack@S12.required_evidence',
   ];
 
   let ok = true;

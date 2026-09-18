@@ -17,7 +17,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import JSZip from 'jszip';
-import { DIST, resolveTargets, fmtBytes, parseFrontmatter, parseManifest, Report } from './lib.mjs';
+import { DIST, resolveTargets, fmtBytes, parseFrontmatter, parseManifest, parseRegistry, checkRegistry, Report } from './lib.mjs';
 
 const SIZE_LIMIT = 25 * 1024 * 1024;
 const REQUIRED = ['SKILL.md', 'agents/openai.yaml'];
@@ -94,6 +94,14 @@ async function verifyZip(skill, zipPath, r) {
     r.info(`Manifest ${entriesM.length} エントリ / ZIP 内 PDF ${declared.size} 件を照合`);
   } else if ([...contents.keys()].some((n) => n.endsWith('.pdf'))) {
     r.error('ZIP に PDF があるが Manifest が無い');
+  }
+
+  // --- Context Registry (ZIP 内で閉じていること) ---------------------------
+  if (contents.has('references/REGISTRY.md')) {
+    const reg = parseRegistry(contents.get('references/REGISTRY.md').toString('utf8'));
+    checkRegistry(reg, [...contents.keys()], (p) => contents.get(p).toString('utf8'), r);
+  } else if ([...contents.keys()].some((n) => n.startsWith('references/contexts/'))) {
+    r.error('ZIP に references/contexts/ があるが REGISTRY.md が無い');
   }
 
   // --- 内部参照 ------------------------------------------------------------

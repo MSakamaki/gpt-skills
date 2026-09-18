@@ -49,7 +49,7 @@ npm run check -- --skill=<name>    # 1 つだけ対象にする
 4. 設計判断を伴うなら `docs/spec/<skill-name>.md` を作る。`common.md` を継承し、固有の事項だけを書く。**spec が無い Skill へ設計判断を加えるときは spec を先に作る。**
 5. `npm run check` を実行する。
 
-`references/` は必須ではなく、中身は Skill ごとに違う。`adversarial-answer` は Method Card と論文、`slide-visual` は確認ケース (`references/test-cases.md`) を置き、`guided-clarification` は `SKILL.md` 単体で完結している。
+`references/` は必須ではなく、中身は Skill ごとに違う。`adversarial-answer` は Method Card と論文、`slide-visual` は確認ケース (`references/test-cases.md`) を置き、`slide-studio` は Context Registry (`references/REGISTRY.md`)・Context ファイル (`references/contexts/`)・ドメインガイド (`references/domain-guide.md`) を置き、`guided-clarification` は `SKILL.md` 単体で完結している。
 
 ## Skill を編集する
 
@@ -80,6 +80,21 @@ PDF の同梱条件は [docs/spec/adversarial-answer.md](docs/spec/adversarial-a
 
 変更したら [docs/test/slide-visual.md](docs/test/slide-visual.md) の受入基準 (AC-01〜22) を読み直し、根拠列が成立するかを確認して結果を更新する。
 
+## slide-studio を触る前に読む
+
+正本は [docs/spec/slide-studio.md](docs/spec/slide-studio.md)。1 Skill の中に 69 の専門 Context (Designer 32 / Reviewer 32 / Validator 4 / Navigator 1) を持つ Context Router 型の Skill で、**§6 の不変条件 (I-01〜14) と §8 の Context 契約に触れる変更は仕様変更として扱う** (spec §21)。特に次を勝手に変えない。
+
+- 1 Turn = 1 Specialist Context — 人間の操作なしに次 Context へ進む経路を追加しない。「全部やって」でも 1 つだけ実行する
+- Reviewer は修正しない。FAIL は rollback_target を示して止まる。自動修復して PASS にする経路を作らない
+- Context の追加・削除・責務変更・入出力変更・遷移変更は spec §8 と §13.7 を先に更新する。`references/REGISTRY.md` と `references/contexts/<stage>/<context>.md` は 1 対 1 で、`npm run check` が閉包と Designer / Reviewer の対を検査する
+- 出力は PPTX 既定・テンプレート必須・画像は別 Skill で作りユーザーがはめ込む・コード実行が無ければ Build 系は BLOCKED。これらは 2026-09-19 のユーザー決定 (spec §13.5)
+- `references/domain-guide.md` の本文を変えない (spec §13.6)。引用マーカーの置換・見出し番号・冒頭注記・付録以外は元原稿とバイト一致していなければならない
+- 固定値 (枚数・pt・色数・時間) を規則として書かない (I-09)。ガイドの根拠レベル A/B/C/D を崩さない
+
+秘密情報スキャンは、Artifact 参照 `slide_assertion_spec@S03.assertion` のような `名前@S<nn>.項目` をメールアドレスから除外している (`tools/scan-secrets.mjs`)。この形式以外の `@` を含む例を書くときは誤検知を疑う前に内容を確認する。
+
+変更したら [docs/test/slide-studio.md](docs/test/slide-studio.md) の受入基準 (AC-01〜24) を読み直し、根拠列が成立するかを確認して結果を更新する。
+
 ## adversarial-answer を触る前に読む
 
 この Skill だけ設計上の制約が多い。変更前に [docs/handoff.md](docs/handoff.md) §3「覆してはいけない決定事項」を読むこと。Router の構造、Method 選択、PDF の扱いには理由のある決定があり、知らずに変えると設計が崩れる。
@@ -101,9 +116,13 @@ PDF の同梱条件は [docs/spec/adversarial-answer.md](docs/spec/adversarial-a
 | Method の実行仕様 | `src/adversarial-answer/references/methods/METHOD-*.md` |
 | 論文の書誌・ライセンス・SHA256 | `src/adversarial-answer/references/REFERENCE-MANIFEST.md` |
 | 全 Skill 共通の規定 | [docs/spec/common.md](docs/spec/common.md) |
-| Skill ごとの設計判断・研究根拠 | `docs/spec/<skill-name>.md` — [adversarial-answer](docs/spec/adversarial-answer.md) / [guided-clarification](docs/spec/guided-clarification.md) / [slide-visual](docs/spec/slide-visual.md) |
-| 受入基準の評価結果 | `docs/test/<skill-name>.md` — [guided-clarification](docs/test/guided-clarification.md) / [slide-visual](docs/test/slide-visual.md) |
+| Skill ごとの設計判断・研究根拠 | `docs/spec/<skill-name>.md` — [adversarial-answer](docs/spec/adversarial-answer.md) / [guided-clarification](docs/spec/guided-clarification.md) / [slide-visual](docs/spec/slide-visual.md) / [slide-studio](docs/spec/slide-studio.md) |
+| 受入基準の評価結果 | `docs/test/<skill-name>.md` — [guided-clarification](docs/test/guided-clarification.md) / [slide-visual](docs/test/slide-visual.md) / [slide-studio](docs/test/slide-studio.md) |
 | `slide-visual` の確認ケース (T / V / S) | `src/slide-visual/references/test-cases.md` |
+| `slide-studio` の Context 一覧・入出力・遷移・差し戻し先 | `src/slide-studio/references/REGISTRY.md` |
+| `slide-studio` の各 Context の手順 | `src/slide-studio/references/contexts/<stage>/<context>.md` |
+| `slide-studio` のドメイン知識 (スライド設計の科学的根拠) | `src/slide-studio/references/domain-guide.md` |
+| `slide-studio` の確認ケース (A / T / B / S) | `src/slide-studio/references/test-cases.md` |
 | 覆してはいけない決定 (D1〜D10) | [docs/handoff.md](docs/handoff.md) §3 |
 
 **spec と実装が矛盾する場合、spec を優先する。** 実装だけを変えて spec と食い違わせてはならない。変更手順と完了条件は `docs/spec/common.md` §4 / §5 が正本。

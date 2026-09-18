@@ -1,0 +1,108 @@
+# スライド作成スタジオ
+
+スキル名：`slide-studio`　版：**1.0.0**  
+初期版作成日：2026年9月19日
+
+## できること
+
+プレゼンテーション資料を、根拠のある手順で 1 工程ずつ作ります。目的・聴衆の整理 (Foundation) → Deck の構成 → Slide ごとの主張・証拠・視覚表現・話者原稿・レイアウト・スタイル・段階提示 → PPTX テンプレートへの組み上げ → 配布形態 → アクセシビリティ・品質・実機確認、の順に進み、各工程の成果物 (Artifact) は別の Reviewer が検証します。
+
+1 回の操作で実行する工程は 1 つだけです。「最後まで自動で作る」スキルではありません。スライド設計の判断はすべて、同梱の `references/domain-guide.md` (認知負荷理論、Mayer のマルチメディア原理、assertion–evidence、Gestalt、グラフ知覚、アクセシビリティ指針などを整理したガイド) を根拠にします。
+
+対象外にしているもの。
+
+- 画像 (写真・イラスト・アイコン) の生成。画像の役割・条件と配置枠だけを定め、画像そのものは別の画像作成スキルや画像生成機能で作ってユーザーがはめ込みます
+- PPTX テンプレート無しでの組み上げ。テンプレートはユーザーが用意します
+- 「美しさ」の一律な基準や特定テンプレートへの固定
+
+## 明示して使う
+
+**ユーザーが意図的にこのスキルの利用を指定した場合だけ動きます。** スライドやプレゼンの話題が出ただけでは適用されません。
+
+ChatGPT では `@` からスキルを選択できます。[1] 選択した状態で依頼を伝えるか、文章で利用を明示します。
+
+```text
+slide-studio を使って。役員向け 10 分の社内報告を作りたい。テンプレートと売上データを添付する。
+```
+
+最初は `workflow-navigator` (使い方と進捗の案内) か `brief-normalizer` (依頼の構造化) から始まります。以降は次のように操作します。
+
+| 操作 | 意味 |
+|---|---|
+| `次へ` | 直前の結果が示す次の工程を 1 つ実行する |
+| `戻す` | 直前の FAIL が示す差し戻し先を実行する (Designer が新しい版を作る) |
+| `状況` | 進捗・実行できる工程・不足している入力を表示する |
+| Context 名 (例: `slide-assertion-designer S03`) | その工程を指定して実行する |
+| 「Slide 3 の主張を作って」 | 最も合う工程を 1 つ選んで実行する |
+| ファイルや実測値の提供 | 外部入力として受け取る (工程は実行しない) |
+
+各工程の成果物は会話中の YAML ブロックとして出力されます。これが作業の状態です。スキルの内部に隠れた状態はありません。上流の成果物を作り直したら、それに基づく下流は「要再確認」として案内されます。
+
+## 前提と環境
+
+| 前提 | 内容 |
+|---|---|
+| PPTX テンプレート | `delivery-artifact-planner` 以降で必須。無い場合はその工程が BLOCKED になり、先へ進めません |
+| コード実行機能 | テンプレートの検査、Chart・表・図形の実装、Slide と Deck の組み上げ、配布形態の作成に必要です。無い環境では該当工程が BLOCKED になります (設計工程は動きます) |
+| 元資料 (`source_materials`) | 証拠 (データ・例・出典) の出所。無い主張に証拠を創作することはなく、`slide-evidence-selector` が BLOCKED になります |
+| 実測情報 (`environment_facts`) | `presentation-preflight-reviewer` に必要。投影環境・最遠席の可読性・リハーサル時間など。無ければ BLOCKED。AI の推測で合格にはしません |
+| 測定データ (`measured_results`) | `outcome-evaluator` に必要。無ければ BLOCKED。`DELIVERY_READY` と `OUTCOME_VALIDATED` は別の状態です |
+
+出力は PPTX を既定とし、文字・表・Chart・図形はテンプレート上のネイティブ要素として組み上げます。画像は `image-generator` が受け渡し仕様と配置枠を作り、ユーザーが別途作った画像をはめ込みます。ChatGPT では作業中の PPTX ファイルがセッションで失われることがあります。Build 系の工程の後は、案内される方法でファイルを取得してください。
+
+## 工程の全体像
+
+```text
+Foundation      brief → audience → mode → delivery plan → success criteria → validation plan → accessibility policy
+Deck Design     deck outline → slide sequence
+Slide Content   content model → (assertion → evidence | activity | structural) → copy → speaker track
+Visual Design   visual medium → (chart | table | diagram | image) → layout → style → animation
+Rendering/Build renderers → slide build → (animation build) → deck build
+Delivery        delivery variants (live / handout / recording support)
+Validation      accessibility → quality audit → preflight → (outcome)
+```
+
+各工程には Designer と Reviewer が対になっています (Validation は独立検証のみ)。Reviewer は修正せず、問題を生成した最小の上流工程を差し戻し先として示します。工程の一覧・入出力・遷移は `references/REGISTRY.md` が正本です。
+
+## 起動設定と導入後の確認
+
+`agents/openai.yaml` に次の設定を含めています。
+
+```yaml
+policy:
+  allow_implicit_invocation: false
+```
+
+公式資料では、この設定によって Codex の暗黙起動を無効にできることが明記されています。[1] **ChatGPT Web/Desktop でも同じ設定が必ず同じように反映されると、この ZIP だけからは保証しません。** 明示起動専用の説明文と本体の制御も併用し、利用先で実際の明示起動・非適用・継続を確認してください。
+
+導入・更新の操作は、利用環境の最新の公式案内を参照してください。[2] 導入後は、明示選択で開始すること、未選択の通常依頼には適用されないこと、1 回の操作で 1 工程だけ進むこと、FAIL で止まって差し戻し先が示されることを確認します。
+
+ZIP の作成・検査・配布は、アカウントへのインストール、既存版への反映、実行試験の完了を意味しません。
+
+## ファイル構成と保守
+
+```text
+slide-studio/
+  SKILL.md                      Router (実行規則の正本)
+  agents/openai.yaml            表示情報と起動ポリシー
+  assets/icon.svg
+  README.md / CHANGELOG.md
+  references/
+    REGISTRY.md                 Context Registry (一覧・入出力・遷移・差し戻し先)
+    domain-guide.md             ドメイン知識の正本 (§1〜§7 + 付録)
+    test-cases.md               確認ケース
+    contexts/<stage>/<context>.md   各 Context の手順 (69 本)
+```
+
+実行時に読むのは `SKILL.md`、`REGISTRY.md`、対象の Context ファイル 1 本、その Context が指定するガイドの節だけです。README・CHANGELOG・test-cases は保守用で、通常の実行では読みません。
+
+## 検証状況
+
+配布時の静的検査と、導入先での会話動作・生成物の実地検証を区別します。静的検査では、構造、YAML、内部参照、Registry と Context ファイルの 1 対 1 対応、Designer / Reviewer の対、遷移先と Artifact 名の解決を確認しています。実地テストの期待結果は `references/test-cases.md` に記載していますが、記載は合格を意味しません。
+
+## 公式情報の参照先
+
+2026年9月19日確認。製品仕様の参考であり、本スキルの設計判断の根拠ではありません。
+
+[1]: https://learn.chatgpt.com/docs/build-skills
+[2]: https://help.openai.com/ja-jp/articles/20001066-skills-in-chatgpt

@@ -6,7 +6,7 @@
  */
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { skillDir, resolveTargets, walk, sha256, fmtBytes, parseFrontmatter, parseManifest, Report } from './lib.mjs';
+import { skillDir, resolveTargets, walk, sha256, fmtBytes, parseFrontmatter, parseManifest, parseRegistry, checkRegistry, Report } from './lib.mjs';
 
 const REQUIRE_V2 = process.argv.includes('--require-v2');
 const SIZE_LIMIT = 25 * 1024 * 1024;
@@ -155,6 +155,16 @@ function validateSkill(skill, r) {
     r.info(`Manifest ${entries.length} エントリ / 同梱 ${declared.size} 件`);
   } else if (files.some((f) => f.endsWith('.pdf'))) {
     r.error('PDF があるが references/REFERENCE-MANIFEST.md が無い');
+  }
+
+  // --- Context Registry (references/REGISTRY.md を持つ Skill だけ) ---------
+  // Router 型 Skill (slide-studio) の Context 一覧が閉じていること、Designer / Reviewer が対であること、
+  // 行と references/contexts/ のファイルが 1 対 1 であることを検査する。規則は lib.mjs の checkRegistry。
+  if (files.includes('references/REGISTRY.md')) {
+    const reg = parseRegistry(readFileSync(abs('references/REGISTRY.md'), 'utf8'));
+    checkRegistry(reg, files, (p) => readFileSync(abs(p), 'utf8'), r);
+  } else if (files.some((p) => p.startsWith('references/contexts/'))) {
+    r.error('references/contexts/ があるが references/REGISTRY.md が無い');
   }
 
   // --- サイズ --------------------------------------------------------------

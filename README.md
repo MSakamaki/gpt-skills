@@ -9,6 +9,7 @@ ChatGPT 向けの Skill をまとめたリポジトリ (一部は Codex / API �
 | [adversarial-answer](src/adversarial-answer/SKILL.md) | 依頼を 10 項目で確定し、想定される失敗モードに適した敵対的検証を 3 回行って回答を作る | chatgpt / codex / api / atlas |
 | [guided-clarification](src/guided-clarification/SKILL.md) | 最終回答を実質的に変える確認だけを `0/1/2/3/9` の選択式で 1 問ずつ行ってから回答する | chatgpt |
 | [slide-visual](src/slide-visual/SKILL.md) | 議論済みのスライドから、固定したフラットスタイルの差し込み画像を生成する。説明量は画像ごとに選ぶ | chatgpt / codex / api / atlas |
+| [slide-studio](src/slide-studio/SKILL.md) | 目的・聴衆の整理から PPTX テンプレートへの組み上げと検証まで、69 の専門 Context を 1 回の操作につき 1 つだけ実行して進める。Designer と Reviewer を分離し、FAIL は差し戻し先を示して止まる | chatgpt / codex / api / atlas |
 
 対応プロダクトは各 Skill の `agents/openai.yaml` の `policy.products` が正本。いずれも `allow_implicit_invocation: false` で、ユーザーが明示的に起動したときだけ動く。
 
@@ -19,6 +20,7 @@ gpt-skills/
 ├── src/                     Skill 本体。ここだけが ZIP に入る
 │   ├── adversarial-answer/
 │   ├── guided-clarification/
+│   ├── slide-studio/
 │   └── slide-visual/
 ├── tools/                   検証・ビルド・PDF 調査ツール (Node)
 ├── docs/                    開発用ドキュメント
@@ -35,7 +37,7 @@ gpt-skills/
 └── CLAUDE.md                メンテナンス手順
 ```
 
-Skill 1 つの構成は次のとおり。必須は `SKILL.md` と `agents/openai.yaml` の 2 つだけ。`references/` は任意で、中身は Skill ごとに違う (`adversarial-answer` は Method Card と論文、`slide-visual` は確認ケース、`guided-clarification` は持たない)。
+Skill 1 つの構成は次のとおり。必須は `SKILL.md` と `agents/openai.yaml` の 2 つだけ。`references/` は任意で、中身は Skill ごとに違う (`adversarial-answer` は Method Card と論文、`slide-visual` は確認ケース、`slide-studio` は Context Registry と 69 本の Context ファイルとドメインガイド、`guided-clarification` は持たない)。
 
 ```text
 src/adversarial-answer/          ← ディレクトリ名 = SKILL.md の name
@@ -50,7 +52,7 @@ src/adversarial-answer/          ← ディレクトリ名 = SKILL.md の name
     └── ROUTER-TEST-CASES.md     Router の回帰テスト
 ```
 
-検証は `SKILL.md` と `agents/openai.yaml` だけを全 Skill 共通の必須とし、`references/methods/` または `METHOD-ROUTING.md` を持つ Skill にだけ Method Card と Manifest の完全性を要求する。
+検証は `SKILL.md` と `agents/openai.yaml` だけを全 Skill 共通の必須とし、`references/methods/` または `METHOD-ROUTING.md` を持つ Skill にだけ Method Card と Manifest の完全性を要求する。`references/REGISTRY.md` を持つ Skill (`slide-studio`) には、Context Registry と `references/contexts/` の整合を要求する。
 
 `REFERENCE-MANIFEST.md` と `ROUTER-TEST-CASES.md` は `SKILL.md` からの参照を持たず、実行時には読み込まれない。それでも配布物へ含めているのは、**同梱の根拠 (出所・ライセンス) と Router の検証状況を、配布物だけを見て確認できるようにするため。** 2 ファイルで約 52KB あるが、ZIP 全体 (約 3.4MB、大半が PDF) の 1.5% で、25MB 制限には影響しない。
 
@@ -103,9 +105,10 @@ node tools/pdftext.mjs <file.pdf> [from] [to]    # 指定ページのテキス�
 - `agents/openai.yaml` の `allow_implicit_invocation` が真偽値の `false` であること ([docs/spec/common.md](docs/spec/common.md) CINV-01)
 - `src/` 配下 Markdown からの内部参照 (`references/…` 等) のリンク切れ
 - `REFERENCE-MANIFEST.md` と実体の整合 — SHA256・ファイルサイズ・`Bundled` と実体の有無・未登録 PDF の検出
+- `references/REGISTRY.md` を持つ Skill では、Context Registry の閉包 (全 `next` / `rollback_candidates` が Context か定義済みトークン、全 `requires` が生成・外部入力・派生のいずれか)、Designer / Reviewer の対 (I-04)、Registry の行と `references/contexts/<stage>/<context>.md` の 1 対 1 対応と見出し・種別の一致 ([docs/spec/slide-studio.md](docs/spec/slide-studio.md) §13.4)
 - Skill 合計サイズ (20MB で WARN / 25MB で ERROR)
 
-`tools/verify-package.mjs` は生成済みの `dist/<skill>/skill.zip` 自体を検査する。ZIP 内 PDF の SHA256 を ZIP 内 Manifest と照合し、開発用ファイルの混入と `Bundled: NO` の PDF の混入を検出する。
+`tools/verify-package.mjs` は生成済みの `dist/<skill>/skill.zip` 自体を検査する。ZIP 内 PDF の SHA256 を ZIP 内 Manifest と照合し、開発用ファイルの混入と `Bundled: NO` の PDF の混入を検出する。Registry を持つ Skill では、ZIP 内でも同じ Registry 検査を行う。
 
 ## 秘密情報を git に入れない仕組み
 
