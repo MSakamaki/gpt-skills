@@ -94,7 +94,7 @@ npm run contracts    # 照合だけを単独で実行する
 
 ## slide-studio を触る前に読む
 
-正本は [docs/spec/slide-studio.md](docs/spec/slide-studio.md)。1 Skill の中に 69 の専門 Context (Designer 32 / Reviewer 32 / Validator 4 / Navigator 1) を持つ Context Router 型の Skill で、**§6 の不変条件 (I-01〜16) と §8 の Context 契約に触れる変更は仕様変更として扱う** (spec §21)。特に次を勝手に変えない。
+正本は [docs/spec/slide-studio.md](docs/spec/slide-studio.md)。1 Skill の中に 69 の専門 Context (Designer 32 / Reviewer 32 / Validator 4 / Navigator 1) を持つ Context Router 型の Skill で、**§6 の不変条件 (I-01〜17) と §8 の Context 契約に触れる変更は仕様変更として扱う** (spec §21)。特に次を勝手に変えない。
 
 - 1 Turn = 1 Specialist Context — 人間の操作なしに次 Context へ進む経路を追加しない。「全部やって」でも 1 つだけ実行する
 - Reviewer は修正しない。FAIL は rollback_target を示して止まる。自動修復して PASS にする経路を作らない
@@ -105,10 +105,11 @@ npm run contracts    # 照合だけを単独で実行する
 - 作業言語と成果物の声を混ぜない (I-15)。対象読者向けのトーン・表記の指定は `deliverable_voice` に記録し、聴衆が読む文字列だけに適用する。Artifact の記述・所見・案内は常に日本語の常体
 - 各ターンを選択式の「次にすること」で終える (I-16)。結果ブロックだけ返して終える形へ戻さない。選択肢の記号はアルファベット (数字は Slide 番号と紛れる)、`0` は使わない、`9` は深掘り、推奨は常に `A`、説明は 4 観点で行数では規定しない
 - `guided-clarification` とは**継承ではなく参照**の関係にする (spec §13.14)。この Skill の選択式の変更を `slide-visual` へ持ち込まない
+- 推論で埋めない (I-17)。上流に無く埋め方で成果物が変わる点は確認ターンで聞く。**確認ターンでは YAML を出さない。** Reviewer と Validator は確認せず判定する。価値判断の論点に推奨と委任の選択肢を置かない
 
 秘密情報スキャンは、Artifact 参照 `slide_assertion_spec@S03.assertion` のような `名前@S<nn>.項目` をメールアドレスから除外している (`tools/scan-secrets.mjs`)。この形式以外の `@` を含む例を書くときは誤検知を疑う前に内容を確認する。
 
-変更したら [docs/test/slide-studio.md](docs/test/slide-studio.md) の受入基準 (AC-01〜28) を読み直し、根拠列が成立するかを確認して結果を更新する。実地検証で問題が見つかったら、同書の「実地検証で見つかった問題」へ追記し、spec のどの節を変えたかを残す。
+変更したら [docs/test/slide-studio.md](docs/test/slide-studio.md) の受入基準 (AC-01〜35) を読み直し、根拠列が成立するかを確認して結果を更新する。実地検証で問題が見つかったら、同書の「実地検証で見つかった問題」へ追記し、spec のどの節を変えたかを残す。
 
 ## adversarial-answer を触る前に読む
 
@@ -137,7 +138,7 @@ npm run contracts    # 照合だけを単独で実行する
 | `slide-studio` の Context 一覧・入出力・遷移・差し戻し先 | `src/slide-studio/references/REGISTRY.md` |
 | `slide-studio` の各 Context の手順 | `src/slide-studio/references/contexts/<stage>/<context>.md` |
 | `slide-studio` のドメイン知識 (スライド設計の科学的根拠) | `src/slide-studio/references/domain-guide.md` |
-| `slide-studio` の確認ケース (A / T / B / L / N / S) | `src/slide-studio/references/test-cases.md` |
+| `slide-studio` の確認ケース (A / T / B / L / N / Q / S) | `src/slide-studio/references/test-cases.md` |
 | `slide-studio` のターンの並びの例 | `src/slide-studio/SAMPLES.md` (実行時には読まない) |
 | 覆してはいけない決定 (D1〜D10) | [docs/handoff.md](docs/handoff.md) §3 |
 

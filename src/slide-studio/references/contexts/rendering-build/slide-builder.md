@@ -76,7 +76,7 @@ download: |                            # ユーザーが作業ファイルを取
 ## 手順
 
 1. 作業ファイルを用意する。初回は `pptx_template` から作業ファイルを作る (テンプレートのサンプル Slide は `template_profile.sample_slides_to_remove` に従って除く)。2 枚目以降は既存の作業ファイルへ追加する。作業ファイルがセッションで失われていたら、承認済みの `slide_build_static@*` の `build_recipe` から再構築する。ここでも設計判断はしない
-2. `template_profile.layouts` から、`slide_layout_spec@S` の構造 (見出し領域 + 証拠領域、活動指示の 4 区分など) に合うレイアウトを選ぶ。合うものが無ければ最も近い空白系レイアウトを使い、`issues` に記録する
+2. `template_profile.layouts` から、`slide_layout_spec@S` の構造 (見出し領域 + 証拠領域、活動指示の 4 区分など) に合うレイアウトを選ぶ。**合うものが複数あって選び方で見た目が変わる場合、または合うものが無い場合は、推論で選ばず確認ターンで聞く** (I-17)。選択肢はテンプレートに実在するレイアウト名と、空白系を使う案とする
 3. `slide_copy_spec@S` の文字列を、`slide_layout_spec@S` の領域へ、`visual_style_spec@S` の書式で置く。文字列は一致させる。見出しはタイトルプレースホルダに置き、一意のタイトルにする
 4. `media_assets@S` を置く。`chart_asset` / `table_asset` / `diagram_asset` は `build_recipe` を実行してネイティブ要素として作る。`image_asset` は `placeholder` の位置に識別ラベル付きの枠を置き、`alt_text` を設定する。画像そのものは挿入しない
 5. 読み上げ順を `slide_layout_spec@S.reading_order` に合わせる (図形の順序)。使わないプレースホルダを除く
