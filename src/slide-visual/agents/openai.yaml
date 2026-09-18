@@ -1,0 +1,13 @@
+interface:
+  display_name: スライド画像を統一スタイルで作成
+  short_description: 明示起動で、選択式確認と画像ごとの説明量選択を経て、統一スタイルの透過画像を生成します。
+  brand_color: '#3B82F6'
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  allow_implicit_invocation: false
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas

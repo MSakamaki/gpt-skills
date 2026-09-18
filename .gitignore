@@ -1,6 +1,10 @@
 node_modules/
 dist/
 *.log
+# --- OS が作る付随ファイル (src/ へ残すと ZIP へ入る) ---
+.DS_Store
+Thumbs.db
+desktop.ini
 # --- 秘密情報 (git へ入れてはいけないもの) ---
 .env
 .env.*

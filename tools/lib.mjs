@@ -55,14 +55,44 @@ export const sha256 = (abs) => createHash('sha256').update(readFileSync(abs)).di
 export const fmtBytes = (n) =>
   n >= 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(2)}MB` : `${(n / 1024).toFixed(1)}KB`;
 
-/** SKILL.md の YAML frontmatter を最小限だけ解釈する (name / description)。 */
+/** 前後のクォートだけを外す (YAML の引用スカラー)。 */
+const unquote = (v) => {
+  const m = /^(['"])([\s\S]*)\1$/.exec(v);
+  return m ? m[2] : v;
+};
+
+/**
+ * SKILL.md の YAML frontmatter を最小限だけ解釈する (name / description)。
+ *
+ * ブロックスカラー (`description: >-` の次行以降へ本文を書く形式) に対応する。
+ * これを扱えないと description の中身を検査できず、長さだけを見ても意味がない。
+ */
 export function parseFrontmatter(text) {
   const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/.exec(text);
   if (!m) return { ok: false, fields: {}, body: text };
   const fields = {};
-  for (const line of m[1].split(/\r?\n/)) {
-    const kv = /^([A-Za-z0-9_-]+):\s*(.*)$/.exec(line);
-    if (kv) fields[kv[1]] = kv[2].trim();
+  const lines = m[1].split(/\r?\n/);
+  for (let i = 0; i < lines.length; i += 1) {
+    const kv = /^([A-Za-z0-9_-]+):\s*(.*)$/.exec(lines[i]);
+    if (!kv) continue;
+    const key = kv[1];
+    const raw = kv[2].trim();
+    // `|` `|-` `>` `>-` などのブロックスカラー。以降のインデント行が値になる。
+    const block = /^([|>])[+-]?\d*$/.exec(raw);
+    if (!block) {
+      fields[key] = unquote(raw);
+      continue;
+    }
+    const buf = [];
+    while (i + 1 < lines.length) {
+      const next = lines[i + 1];
+      if (next.trim() !== '' && !/^\s/.test(next)) break; // インデントが戻ったらブロック終了
+      buf.push(next.trim());
+      i += 1;
+    }
+    // 折りたたみ (>) は改行を空白へ畳む。リテラル (|) は改行を保つ。
+    fields[key] =
+      block[1] === '>' ? buf.join(' ').replace(/\s+/g, ' ').trim() : buf.join('\n').trim();
   }
   return { ok: true, fields, body: text.slice(m[0].length) };
 }

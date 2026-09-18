@@ -1,6 +1,6 @@
 # adversarial-answer v2 — 引き継ぎ
 
-最終更新: 2026-09-16 (ドキュメント監査の是正と CI 追加を反映)
+最終更新: 2026-09-18 (Skill `slide-visual` の追加に伴いリポジトリ構成の記述を更新)
 
 改訂履歴は [handoff-history.md](handoff-history.md) に分離している。本書は常に「現在の状態と次にやること」だけを書き、過去の経緯は履歴側へ移す。
 
@@ -43,10 +43,12 @@ v2 移行の Phase 1〜8 はすべて完了している。v1 の「単一論文�
 gpt-skills/                          ← リポジトリルート (D:\gpt-skills)
 ├── src/
 │   ├── adversarial-answer/          本書が対象とする Skill
-│   └── guided-clarification/        2026-09-16 にユーザーが追加。3 ファイル / 8.7KB
+│   ├── guided-clarification/        2026-09-16 にユーザーが追加。3 ファイル / 8.7KB
+│   └── slide-visual/                2026-09-18 にユーザーが追加。6 ファイル / 44.5KB
 ├── tools/      node 製の検証・ビルド・PDF 調査ツール (配布対象外)
 ├── docs/       配布対象外
 │   ├── spec/<skill-name>.md         Skill ごとの仕様
+│   ├── test/<skill-name>.md         受入基準の評価結果
 │   ├── handoff.md / handoff-history.md   本書と改訂履歴
 │   └── PHASE7-AB.md                 v1 との A/B 実測
 ├── plans/      進行中の計画・調査メモ。完了したら docs/ へ畳み込む (現在は空)
@@ -57,7 +59,7 @@ gpt-skills/                          ← リポジトリルート (D:\gpt-skills
     └── <skill-name>/skill.zip       (git 管理外)
 ```
 
-**本書 (`handoff.md`) は `adversarial-answer` の引き継ぎであり、`guided-clarification` は対象外。** `guided-clarification` はユーザーが作成した独立の Skill で、`references/` を持たず `SKILL.md` 単体で完結している。`docs/spec/` にあるのも `adversarial-answer` の仕様だけ。
+**本書 (`handoff.md`) は `adversarial-answer` の引き継ぎであり、`guided-clarification` と `slide-visual` は対象外。** どちらもユーザーが作成した独立の Skill で、仕様は [spec/guided-clarification.md](spec/guided-clarification.md) と [spec/slide-visual.md](spec/slide-visual.md) が持つ (受入基準の評価結果は `docs/test/<skill-name>.md`)。`slide-visual` は `references/test-cases.md` を持つが、`adversarial-answer` の v2 成果物 (Method Card / Manifest / Router テスト) とは無関係で、検証条件も変わらない。
 
 ```bash
 npm install

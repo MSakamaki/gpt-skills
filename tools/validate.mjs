@@ -20,6 +20,8 @@ const V2_ARTIFACTS = [
 ];
 const V2_METHOD_CARDS = 9;
 const BACKSLASH = String.fromCharCode(92);
+/** OS が作る付随ファイル。src/ に残ると ZIP へ入ってしまう。 */
+const JUNK = /(^|[/])([.]DS_Store|Thumbs[.]db|desktop[.]ini|[.]_.+)$/;
 
 const r = new Report();
 const targets = resolveTargets();
@@ -41,6 +43,7 @@ function validateSkill(skill, r) {
   const v2 = (msg) => (REQUIRE_V2 ? r.error(msg) : r.warn(msg));
 
   for (const p of REQUIRED) if (!files.includes(p)) r.error(`必須ファイルが無い: ${p}`);
+  for (const p of files) if (JUNK.test(p)) r.error(`配布物に入ってはいけないファイル: ${p}`);
 
   // --- SKILL.md -----------------------------------------------------------
   if (files.includes('SKILL.md')) {
@@ -59,6 +62,8 @@ function validateSkill(skill, r) {
       else {
         if (fields.description.length > 1024)
           r.warn(`description が長い (${fields.description.length} 文字)`);
+        if (fields.description.length < 20)
+          r.warn(`description が短い (${fields.description.length} 文字) — 何をするか・いつ使うかを書く`);
         r.info(`name=${fields.name} / description=${fields.description.length} 文字`);
       }
     }
@@ -97,6 +102,11 @@ function validateSkill(skill, r) {
     for (const m of y.matchAll(/icon_\w+:\s*(\S+)/g))
       if (!existsSync(abs(m[1]))) r.error(`agents/openai.yaml の icon が存在しない: ${m[1]}`);
     if (!/display_name:/.test(y)) r.error('agents/openai.yaml に display_name が無い');
+    // common.md CINV-01: 明示起動のみ。真偽値の false であること (文字列の 'false' は不可)
+    const implicit = /allow_implicit_invocation:\s*(\S+)/.exec(y);
+    if (!implicit) r.error('agents/openai.yaml に policy.allow_implicit_invocation が無い (common.md CINV-01)');
+    else if (implicit[1] !== 'false')
+      r.error(`allow_implicit_invocation は真偽値の false にする (現在: ${implicit[1]}) — common.md CINV-01`);
   }
 
   // --- v2 成果物 (adversarial-answer 固有) ---------------------------------

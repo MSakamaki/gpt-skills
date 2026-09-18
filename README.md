@@ -8,8 +8,9 @@ ChatGPT 向けの Skill をまとめたリポジトリ (一部は Codex / API �
 |---|---|---|
 | [adversarial-answer](src/adversarial-answer/SKILL.md) | 依頼を 10 項目で確定し、想定される失敗モードに適した敵対的検証を 3 回行って回答を作る | chatgpt / codex / api / atlas |
 | [guided-clarification](src/guided-clarification/SKILL.md) | 最終回答を実質的に変える確認だけを `0/1/2/3/9` の選択式で 1 問ずつ行ってから回答する | chatgpt |
+| [slide-visual](src/slide-visual/SKILL.md) | 議論済みのスライドから、固定したフラットスタイルの差し込み画像を生成する。説明量は画像ごとに選ぶ | chatgpt / codex / api / atlas |
 
-対応プロダクトは各 Skill の `agents/openai.yaml` の `policy.products` が正本。どちらも `allow_implicit_invocation: false` で、ユーザーが明示的に起動したときだけ動く。
+対応プロダクトは各 Skill の `agents/openai.yaml` の `policy.products` が正本。いずれも `allow_implicit_invocation: false` で、ユーザーが明示的に起動したときだけ動く。
 
 ## リポジトリ構成
 
@@ -17,7 +18,8 @@ ChatGPT 向けの Skill をまとめたリポジトリ (一部は Codex / API �
 gpt-skills/
 ├── src/                     Skill 本体。ここだけが ZIP に入る
 │   ├── adversarial-answer/
-│   └── guided-clarification/
+│   ├── guided-clarification/
+│   └── slide-visual/
 ├── tools/                   検証・ビルド・PDF 調査ツール (Node)
 ├── docs/                    開発用ドキュメント
 │   ├── spec/common.md       全 Skill 共通の規定
@@ -33,7 +35,7 @@ gpt-skills/
 └── CLAUDE.md                メンテナンス手順
 ```
 
-Skill 1 つの構成は次のとおり。必須は `SKILL.md` と `agents/openai.yaml` の 2 つだけで、`references/` は `adversarial-answer` 固有。
+Skill 1 つの構成は次のとおり。必須は `SKILL.md` と `agents/openai.yaml` の 2 つだけ。`references/` は任意で、中身は Skill ごとに違う (`adversarial-answer` は Method Card と論文、`slide-visual` は確認ケース、`guided-clarification` は持たない)。
 
 ```text
 src/adversarial-answer/          ← ディレクトリ名 = SKILL.md の name
@@ -55,8 +57,9 @@ src/adversarial-answer/          ← ディレクトリ名 = SKILL.md の name
 ### 新しい Skill を追加する
 
 1. `src/<skill-name>/SKILL.md` を作る。frontmatter の `name` はディレクトリ名と一致させる (不一致は検証エラー)
-2. `src/<skill-name>/agents/openai.yaml` を作る
-3. `npm run check` を実行する
+2. `src/<skill-name>/agents/openai.yaml` を作る (`allow_implicit_invocation: false` は必須)
+3. 設計判断を伴うなら `docs/spec/<skill-name>.md` を作る ([docs/spec/common.md](docs/spec/common.md) を継承し、固有の事項だけを書く)
+4. `npm run check` を実行する
 
 詳細な手順と制約は [CLAUDE.md](CLAUDE.md) にある。
 
@@ -95,7 +98,9 @@ node tools/pdftext.mjs <file.pdf> [from] [to]    # 指定ページのテキス�
 `tools/validate.mjs` は `src/` を検査する。
 
 - 必須ファイル (`SKILL.md`, `agents/openai.yaml`) の存在
-- YAML frontmatter の `name` が lowercase kebab-case であること、ディレクトリ名との一致、`description` の存在
+- OS が作る付随ファイル (`.DS_Store` など) が混入していないこと
+- YAML frontmatter の `name` が lowercase kebab-case であること、ディレクトリ名との一致、`description` の存在と長さ (ブロックスカラー `>-` 形式も解釈する)
+- `agents/openai.yaml` の `allow_implicit_invocation` が真偽値の `false` であること ([docs/spec/common.md](docs/spec/common.md) CINV-01)
 - `src/` 配下 Markdown からの内部参照 (`references/…` 等) のリンク切れ
 - `REFERENCE-MANIFEST.md` と実体の整合 — SHA256・ファイルサイズ・`Bundled` と実体の有無・未登録 PDF の検出
 - Skill 合計サイズ (20MB で WARN / 25MB で ERROR)

@@ -44,17 +44,19 @@ npm run check -- --skill=<name>    # 1 つだけ対象にする
 ## Skill を追加する
 
 1. `src/<skill-name>/SKILL.md` — frontmatter は `name` (lowercase kebab-case、ディレクトリ名と一致) と `description` の 2 つが必須。`description` は「何をするか」と「いつ使うか」の両方を書く。起動条件を書かないと意図しない場面で呼ばれる。
-2. `src/<skill-name>/agents/openai.yaml` — `interface.display_name` 必須。`icon_small` / `icon_large` は実在するパスを指す。
+2. `src/<skill-name>/agents/openai.yaml` — `interface.display_name` 必須。`icon_small` / `icon_large` は実在するパスを指す。`policy.allow_implicit_invocation: false` は全 Skill 共通の必須 (検証エラー、[docs/spec/common.md](docs/spec/common.md) CINV-01)。
 3. `src/<skill-name>/assets/icon.svg` — 既存 Skill の SVG を参考にする。
-4. `npm run check` を実行する。
+4. 設計判断を伴うなら `docs/spec/<skill-name>.md` を作る。`common.md` を継承し、固有の事項だけを書く。**spec が無い Skill へ設計判断を加えるときは spec を先に作る。**
+5. `npm run check` を実行する。
 
-`references/` は必須ではない。`adversarial-answer` 固有の構成であり、`guided-clarification` は `SKILL.md` 単体で完結している。
+`references/` は必須ではなく、中身は Skill ごとに違う。`adversarial-answer` は Method Card と論文、`slide-visual` は確認ケース (`references/test-cases.md`) を置き、`guided-clarification` は `SKILL.md` 単体で完結している。
 
 ## Skill を編集する
 
 - `SKILL.md` は実行手順の正本。肥大化させない (40KB で WARN)。長い仕様は `references/` へ委譲する。
 - `references/` を追加したら、`SKILL.md` から相対パスで参照する。`validate` が `src/` 配下 Markdown の内部参照 (`references/…` `agents/…` `assets/…`) のリンク切れを検出する。
 - PDF を追加する場合は `references/REFERENCE-MANIFEST.md` への登録が必須。未登録 PDF は検証エラーになる。
+- `.DS_Store` など OS が作る付随ファイルを `src/` へ残さない。ZIP へ入ってしまうため検証エラーにしてある。
 
 ```bash
 npm run hash -- <file.pdf>                      # Manifest 用の SHA256 / File Size
@@ -63,6 +65,20 @@ node tools/pdftext.mjs <file.pdf> <from> <to>   # 指定ページのテキスト
 ```
 
 PDF の同梱条件は [docs/spec/adversarial-answer.md](docs/spec/adversarial-answer.md) §4 に従う。出版社の組版版は、著者サイトで無償公開されていても同梱しない。
+
+## slide-visual を触る前に読む
+
+正本は [docs/spec/slide-visual.md](docs/spec/slide-visual.md)。**§5 の不変条件 (INV-01〜13) に触れる変更は、リファクタリングではなく仕様変更として扱う** (spec §25)。特に次を勝手に戻さない。
+
+- 明示起動専用 — 「Slide X の画像」という題材一致で起動する条件を復活させない
+- 固定スタイル (フラット / ブルー・ネイビー・グレー / 透過 / 余白 5〜10%) を画像ごとに聞き直させない
+- 説明量 (文字量) は画像ごとに確定する。未指定なら方式 1・2・3 をすべて提示する。資料全体での固定を既定にしない
+- 文字量以外の質問を 3 択へ水増ししない。`0` は直前の論点だけの委任、`9` は同じ論点の再質問
+- 実行していないことを実行済みと書かない (画像を生成していないのに品質を「検証済み」と記録しない)
+
+選択式確認の判定規則は [docs/spec/guided-clarification.md](docs/spec/guided-clarification.md) §6〜§12 を継承し、差分だけを slide-visual spec §12.2 に置いてある。**継承元を変更したら差分表が成立するかを必ず点検する。** 配布物は別 Skill に依存しない (実装は `SKILL.md` 単体で完結させる)。
+
+変更したら [docs/test/slide-visual.md](docs/test/slide-visual.md) の受入基準 (AC-01〜22) を読み直し、根拠列が成立するかを確認して結果を更新する。
 
 ## adversarial-answer を触る前に読む
 
@@ -85,7 +101,9 @@ PDF の同梱条件は [docs/spec/adversarial-answer.md](docs/spec/adversarial-a
 | Method の実行仕様 | `src/adversarial-answer/references/methods/METHOD-*.md` |
 | 論文の書誌・ライセンス・SHA256 | `src/adversarial-answer/references/REFERENCE-MANIFEST.md` |
 | 全 Skill 共通の規定 | [docs/spec/common.md](docs/spec/common.md) |
-| Skill ごとの設計判断・研究根拠 | `docs/spec/<skill-name>.md` — [adversarial-answer](docs/spec/adversarial-answer.md) / [guided-clarification](docs/spec/guided-clarification.md) |
+| Skill ごとの設計判断・研究根拠 | `docs/spec/<skill-name>.md` — [adversarial-answer](docs/spec/adversarial-answer.md) / [guided-clarification](docs/spec/guided-clarification.md) / [slide-visual](docs/spec/slide-visual.md) |
+| 受入基準の評価結果 | `docs/test/<skill-name>.md` — [guided-clarification](docs/test/guided-clarification.md) / [slide-visual](docs/test/slide-visual.md) |
+| `slide-visual` の確認ケース (T / V / S) | `src/slide-visual/references/test-cases.md` |
 | 覆してはいけない決定 (D1〜D10) | [docs/handoff.md](docs/handoff.md) §3 |
 
 **spec と実装が矛盾する場合、spec を優先する。** 実装だけを変えて spec と食い違わせてはならない。変更手順と完了条件は `docs/spec/common.md` §4 / §5 が正本。
