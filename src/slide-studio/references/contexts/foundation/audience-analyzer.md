@@ -8,7 +8,7 @@
 
 ## 禁止
 
-- brief に無い属性 (人数・役職・知識水準・障害の有無) を創作しない。分からないことは `unknowns` に書く
+- brief に無い属性 (人数・役職・知識水準・障害の有無) を創作しない。**`<未回答>` として残し、「なし」「不明」と書き換えない** (I-18)
 - 発表形式 (`presentation-mode-designer`)、成功条件、構成を先取りしない
 - 「初学者だから減らす」「専門家だから増やす」を機械的に当てない。方向と理由を書く
 - **`deliverable_voice` のトーン・表記を本 Artifact の書き方へ持ち込まない** (I-15)。「幼稚園児向けにひらがなで」とあっても、この分析は作業言語 (日本語の常体) で書く
@@ -31,23 +31,23 @@ segments:                          # 聴衆が一様でなければ複数。主�
   - id: A1
     label: 事業部門の意思決定者
     primary: true
-    size: null                     # brief に無ければ null
+    size: <未回答>                  # brief に無ければ <未回答>。0 や null と書かない
     role_and_authority: |          # 役割・決定権 (brief の記述の範囲で)
     prior_knowledge:               # topic ごとの既有知識
       - topic: 当該プロジェクトの経緯
-        level: high                # none | low | mixed | high | unknown
+        level: high                # none | low | mixed | high | <未回答>
         source: source_quotes.audience
-    expertise: mixed               # novice | mixed | expert | unknown
+    expertise: mixed               # novice | mixed | expert | <未回答>
     language: ja
 viewing_environment:
-  mode: projection                 # projection | online | small_screen | self_read | mixed | unknown
+  mode: projection                 # projection | online | small_screen | self_read | mixed | <未回答>
   notes: |
 accessibility_requirements:
-  known: []                        # 既知の要件
-  status: unknown                  # known | none_stated | unknown
+  known: []                        # 確認できた要件
+  status: <未回答>                 # stated (ユーザーが答えた。「要件は無い」を含む) | <未回答>
 cognitive_conditions:              # brief から導ける認知上の条件
-  continuous_listening_minutes: null
-  multitasking_likely: unknown     # yes | no | unknown
+  continuous_listening_minutes: <未回答>
+  multitasking_likely: <未回答>    # yes | no | <未回答>
   notes: |
 information_density_direction:     # expertise reversal から導く方向
   direction: add_prerequisites     # add_prerequisites | keep_conditions_and_detail | mixed_by_segment
@@ -55,18 +55,19 @@ information_density_direction:     # expertise reversal から導く方向
 voice_consistency:                 # deliverable_voice と聴衆分析の整合
   consistent: true                 # 矛盾する場合 (専門家向けなのに幼児語彙 など) は false と理由
   note: |
-unknowns: []                       # 分析できなかった事項
+unknowns: []                       # <未回答> の項目と、それが何に効くか
 ```
 
 ## 手順
 
-1. `audience_as_stated` と `source_quotes` から聴衆の記述を拾い、一様でなければ segment に分ける。主対象を 1 つ決め、決められなければ `unknowns` へ
-2. topic ごとの既有知識と専門性を、brief の根拠と共に記録する。根拠の無い属性は `unknown` にする
-3. 閲覧環境を `constraints.venue` と `use_case` から記録する。投影・オンライン・小型画面・単独閲覧のどれか決まらなければ `unknown`
-4. 認知上の条件を brief から導く。連続して聞く時間、オンライン配信でのマルチタスクの可能性など。導けないものは `unknown`
+1. `audience_as_stated` と `source_quotes` から聴衆の記述を拾い、一様でなければ segment に分ける。主対象を 1 つ決め、決められなければ確認ターンで聞く
+2. topic ごとの既有知識と専門性を、brief の根拠と共に記録する。根拠の無い属性は `<未回答>` にする
+3. 閲覧環境を `constraints.venue` と `use_case` から記録する。決まらなければ `<未回答>`。「不明」「なし」と書かない (I-18)
+4. 認知上の条件を brief から導く。連続して聞く時間、オンライン配信でのマルチタスクの可能性など。導けないものは `<未回答>`
 5. expertise reversal に照らして情報密度の方向を書く。初学者向けなら前提説明と中間ステップを増やす方向、専門家向けなら軸・誤差・条件・サンプル数を残す方向。**「情報は常に少ないほどよい」とは書かない。** 理由を添える
 5a. `deliverable_voice.reading_level` と `expertise` / `information_density_direction` が矛盾しないかを見て `voice_consistency` に書く。矛盾する場合は `BLOCKED` にせず `false` と理由を記録し、Reviewer の判断に委ねる
-6. brief に対象者の記述が全く無ければ `BLOCKED` とし、`brief-normalizer` へ差し戻して `open_questions` で聴衆を尋ねるよう提案する
+6. `<未回答>` のうち、この工程の分析に要るもの (既有知識の水準、閲覧環境) は確認ターンで聞く。いま要らないものは `<未回答>` のまま下流へ渡す
+7. brief に対象者の記述が全く無ければ `BLOCKED` とし、`brief-normalizer` へ差し戻して聴衆を尋ねるよう提案する
 
 ## 確認しうる論点
 

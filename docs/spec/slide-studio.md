@@ -3,10 +3,10 @@
 ## 1. 文書情報
 
 - **対象**: ChatGPT / Codex Skill `slide-studio` (スライド作成スタジオ)
-- **対象バージョン**: 1.3.0
+- **対象バージョン**: 1.4.0
 - **目的**: `SKILL.md` ほか配布物の実装・保守・レビューに使用する上位仕様
 - **正本**: 本 spec。§4〜§12 は 2026-09-18 に作成された設計仕様「スライド作成 Skill 設計仕様」(旧 `plans/slide-studio-skill.md`) の固定事項を引き継いだもの。§13 は実装時に確定した事項
-- **実装物**: `SKILL.md` / `agents/openai.yaml` / `README.md` / `CHANGELOG.md` / `SAMPLES.md` / `references/REGISTRY.md` / `references/domain-guide.md` / `references/test-cases.md` / `references/contexts/<stage>/<context>.md` (69 本)
+- **実装物**: `SKILL.md` / `agents/openai.yaml` / `README.md` / `CHANGELOG.md` / `SAMPLES.md` / `references/REGISTRY.md` / `references/TURN-FORMATS.md` / `references/domain-guide.md` / `references/test-cases.md` / `references/contexts/<stage>/<context>.md` (69 本)
 - **対象環境**: ChatGPT Web / Desktop、Codex (`policy.products` は chatgpt / codex / api / atlas)
 - **起動方式**: 明示起動のみ (`allow_implicit_invocation: false`)
 - **外部情報取得**: 利用しない (§14)
@@ -140,6 +140,18 @@ Skill の会話・結果ブロック・案内・Artifact の記述は**作業言
 
 ---
 
+### DP-10: 未回答を「なし」と書かない
+
+確認して得た値と、確認していない値を、同じ見た目で書いてはならない。**未回答は未回答として下流へ渡す。**
+
+「指定なし」「未指定」「なし」は、ユーザーが「制約はありません」と答えたときの記録としては正しい。しかし確認していないことの言い換えとして使うと、下流はそれを決定済みとして扱い、制約が無いものとして設計する。結果は推論で埋めたのと変わらない。DP-09 の抜け道になる。
+
+状態は 3 つある。確定 (ユーザーが答えた)、委任 (ユーザーが任せ、こちらが埋めた)、未回答 (確認していない)。未回答は値を持たない。
+
+未回答をその場で解消する必要は無い。**その値が必要になった Context が、そのときに確認する。** 依頼の整理でトーンを確認する必要は無く、画面文章を書く Context が必要とした時点で聞けばよい。未回答が下流へ正しく伝わることが前提になる。
+
+---
+
 ## 6. 不変条件
 
 内部のファイル構成や文面を変えても維持しなければならない条件。**いずれかを変える場合は、リファクタリングではなく仕様変更として扱う** (§21)。
@@ -163,6 +175,7 @@ Skill の会話・結果ブロック・案内・Artifact の記述は**作業言
 | I-15 | 作業言語と成果物の声を分ける。成果物向けの言語・表記・トーン・読解水準の指定を、Artifact の記述・所見・案内・結果ブロックへ適用しない | DP-07 |
 | I-16 | 各ターンを選択式で終える。**確認ターン**は論点の選択肢で、**完了ターン**は結果ブロックと「次にすること」で終える。利用者が次に打てる入力を示さずにターンを終えない | DP-08 |
 | I-17 | 推論で埋めるしかない点を、黙って埋めない。選択式で確認して埋めるか、ユーザーの明示的な委任を得て埋めて記録する | DP-09 |
+| I-18 | 未回答を「なし」「指定なし」「未指定」と書かない。確定・委任・未回答を区別し、未回答は `<未回答>` のまま下流へ渡す | DP-10 |
 
 ---
 
@@ -747,6 +760,42 @@ clarifications:
 
 答えのうち成果物へ反映しきれなかったものは、従来どおり `open_questions` に残す。
 
+### 13.16 値の 3 つの状態 (v1.4.0)
+
+DP-10 / I-18 の実装。v1.3.0 の確認ターンを入れた後も推論が残った。原因は、スキーマ自身が未回答を「なし」と書くよう指示していたことにある。`script: なし`、`tone: 無ければ「指定なし」`、`size: null (brief に無ければ)`、`status: unknown` はいずれも、確認していないことを確定した値の形で書かせていた。
+
+| 状態 | 意味 | 書き方 |
+|---|---|---|
+| 確定 | ユーザーが答えた。「制約は無い」という答えを含む | 値を書く。`clarifications` に `state: answered` |
+| 委任 | ユーザーが明示的に任せ、Context が埋めた | 値を書く。`clarifications` に `state: delegated` と `basis` |
+| 未回答 | 確認していない、または答えが得られていない | `<未回答>` と書く。値を作らない |
+
+規則。
+
+1. **「なし」「指定なし」「未指定」「不明」「N/A」「-」を、確認していないことの言い換えとして使わない。** ユーザーがそう答えたときだけ書ける。その場合の状態は確定である
+2. 未回答は `<未回答>` のまま下流へ渡す。**下流はこれを「制約が無い」と読み替えてはならない**
+3. 未回答をその場で解消しなくてよい。その値が必要になった Context が、そのときに確認する。要らない値を先回りして聞かない
+4. 未回答の項目は `open_questions` / `unknowns` に、何に効くかとともに列挙する
+5. 機能や資料の制約で取得できていない事実は `<未取得>` と書く (テンプレートの検査結果、プレビュー画像)。これも「なし」と書かない
+
+この規則は全 Artifact に及ぶ。スキーマを持つ Context ファイルのうち、未回答を既定値で埋めていた `brief-normalizer` (`deliverable_voice` と `constraints`)、`audience-analyzer` (`size` `level` `expertise` `mode` `status` `cognitive_conditions`)、`delivery-artifact-planner` (`template_profile.theme`) を書き換えた。`preview_ref: null` や `rollback_target: null` のように、状態そのものが別の項目で示されているものは対象外とする。
+
+### 13.17 SKILL.md の委譲 (v1.4.0)
+
+`SKILL.md` は毎ターン読み込むため、条件付きでしか要らない記述は `references/TURN-FORMATS.md` へ移した。実装変更であり契約は変えていない。
+
+| 移した内容 | 読むとき |
+|---|---|
+| 確認ターンの選択肢の作り方、まとめて委任されたときの扱い、`clarifications` の形式 | 確認ターンを出すとき |
+| `FAIL` のときの書き方と例 | `FAIL` を返すとき |
+| `BLOCKED` のときの書き方と例 | `BLOCKED` を返すとき |
+| 問題と差し戻し先の対応表 | 差し戻し先を決めるとき |
+| `review_result` の形式と例 | Reviewer / Validator が判定するとき |
+
+`SKILL.md` に残したのは、毎ターン要る判断の規則である。いつ確認するかの境界、ターンの 2 つの形、値の 3 つの状態、結果ブロックの形式、選択肢の骨格と 4 観点、回答の解釈、Router の手順、操作の解釈。Router の手順 5 に、どの条件で `TURN-FORMATS.md` を読むかを書いた。
+
+判断の規則は `SKILL.md`、書き方と例は `TURN-FORMATS.md` という分担にしてある。両者が食い違ったら `SKILL.md` が正本 (§22)。
+
 ---
 
 ## 14. 外部情報と実行環境機能
@@ -776,6 +825,7 @@ common.md §3 の宣言。
 | `references/contexts/<stage>/<context>.md` | 各 Context の責務・禁止・入力の使い方・出力スキーマ・手順・参照するガイドの節・判定 |
 | `references/domain-guide.md` | ドメイン知識 (§4) |
 | `agents/openai.yaml` | 表示情報と起動ポリシー |
+| `references/TURN-FORMATS.md` | ターンの書き方と例。条件付きで読む (§13.17) |
 | `references/test-cases.md` | 受入基準を検証する具体的なケース (A / T / B / S) と実行記録の様式 |
 | `SAMPLES.md` | ターンの並びの例。実行時には読まない (§13.13) |
 | `README.md` / `CHANGELOG.md` | 導入・環境差・運用、変更履歴 |
@@ -920,6 +970,16 @@ common.md §3 の宣言。
 - When: `A` / `a` / `Ａ` / `9` / `0` / 自由入力で回答される
 - Then: 大文字小文字と全角半角を区別せず、`9` は何も実行せず再提示し、`0` は実行せず推奨が `A` であることを伝え、自由入力は常に有効とする。実行前に何を選んだと解釈したかを 1 行返す。選択肢の提示が無い状態の裸の記号を過去の回答と決めつけない
 
+### AC-36: 未回答を「なし」と書かない
+- Given: 依頼にトーン・表記・人数・会場の指定が無い
+- When: `brief-normalizer` と `audience-analyzer` を実行する
+- Then: 該当項目を `<未回答>` と書き、「なし」「指定なし」「未指定」「不明」と書かない。`open_questions` / `unknowns` に何に効くかとともに列挙する
+
+### AC-37: 未回答を制約なしと読み替えない
+- Given: `deliverable_voice.tone` が `<未回答>` のまま下流へ渡る
+- When: `slide-copywriter` が画面文章を書く
+- Then: 「トーンの指定は無い」と解釈して自由に書かず、そのときに確認する。あるいは未回答のまま書ける範囲で書き、確定していないことを記録する
+
 ### AC-31: 継承元の変更を検出できる
 - Given: `docs/spec/guided-clarification.md` の契約範囲 (§6〜§12) が変更される
 - Then: `npm run check` が本 spec §13.14 の契約依存の SHA256 不一致を ERROR として報告し、実際のハッシュと復旧手順を示す
@@ -984,6 +1044,8 @@ common.md §3 の宣言。
 | AC-33 | Q04 |
 | AC-34 | Q05 |
 | AC-35 | Q06 / Q07 |
+| AC-36 | Q15 / Q16 |
+| AC-37 | Q17 |
 
 **静的検査の合格をもって A / T / B の合格としない** (I-11)。実行環境で走らせていない場合、会話動作を検証済みと記録しない。
 
@@ -1019,6 +1081,8 @@ common.md §3 の宣言。
 - [ ] 推論で埋めない規定 (I-17) と、確認する / しない の境界が残っている
 - [ ] Reviewer と Validator が確認ターンを出さない規定が残っている
 - [ ] 価値判断の論点に推奨と委任の選択肢を置かない規定が残っている
+- [ ] 値の 3 つの状態が `SKILL.md` にあり、スキーマに「なし」「指定なし」「unknown」が既定値として残っていない
+- [ ] `SKILL.md` から `TURN-FORMATS.md` への委譲が保たれ、Router の手順 5 が読む条件を示している
 - [ ] `SAMPLES.md` の例が `SKILL.md` / `REGISTRY.md` / Context ファイルと矛盾しない
 - [ ] §13.14 の契約依存が `npm run check` で照合され、共通と書いた 5 項目が継承元でまだ成立している
 
@@ -1050,6 +1114,7 @@ common.md §3 の宣言。
 - 作業言語と成果物の声の分離 (§13.11) の適用範囲の変更
 - 結果ブロックと「次にすること」の構成 (§7 / §13.12) の変更。記号の体系、`0` と `9` の意味、4 観点を含む
 - 確認ターンの導入条件・形式・記録 (§7.1 / §13.15) の変更。確認する / しない の境界を含む
+- 値の 3 つの状態 (§13.16) の変更。未回答の表し方と、下流での扱いを含む
 - `guided-clarification` との関係 (§13.14) を継承へ格上げすること
 
 **実装変更** (spec を変えずに実施してよい)
@@ -1057,6 +1122,7 @@ common.md §3 の宣言。
 - Context ファイルの文面改善 (責務・入出力・判定を変えない範囲)、`SKILL.md` の章構成変更
 - Artifact スキーマの項目追加 (既存項目の意味を変えない範囲)
 - README / CHANGELOG / test-cases / SAMPLES の整理 (例の追加・文面改善。仕様と矛盾しない範囲)
+- `SKILL.md` と `references/TURN-FORMATS.md` の間での記述の移動 (§13.17)。判断の規則を `SKILL.md` に残す限り
 - 同じ効果を持つ起動設定への変更
 
 ---
@@ -1068,10 +1134,11 @@ common.md §3 の宣言。
 3. [common.md](common.md) — 本 spec が触れていない範囲
 4. `SKILL.md`
 5. `references/REGISTRY.md`
-6. `references/contexts/<stage>/<context>.md`
-7. `agents/openai.yaml`
-8. `references/test-cases.md`
-9. `README.md` / `CHANGELOG.md` / `SAMPLES.md`
+6. `references/TURN-FORMATS.md`
+7. `references/contexts/<stage>/<context>.md`
+8. `agents/openai.yaml`
+9. `references/test-cases.md`
+10. `README.md` / `CHANGELOG.md` / `SAMPLES.md`
 
 `references/domain-guide.md` はこの序列に入らない。ドメイン知識の正本として §4 の分担に従い、本 spec と矛盾するときは人間へ判断を求める。
 
@@ -1081,4 +1148,4 @@ common.md §3 の宣言。
 
 本 Skill を保守する際、最優先する原則は次の 1 文とする。
 
-> **明示起動されたときだけ、1 回の操作で 1 つの専門 Context を実行し、生成と検証を分け、FAIL は問題を生成した最小の上流へ差し戻して止まる。内容を先に装飾を後に、固定値を法則にせず、実行していないことを実行済みと言わない。分からないことは推論で埋めず選択式で確認し、作業の記録は作業言語で書き、次に打てる入力を示してターンを終える。**
+> **明示起動されたときだけ、1 回の操作で 1 つの専門 Context を実行し、生成と検証を分け、FAIL は問題を生成した最小の上流へ差し戻して止まる。内容を先に装飾を後に、固定値を法則にせず、実行していないことを実行済みと言わない。分からないことは推論で埋めず選択式で確認し、確認していないことを「なし」と書かず、作業の記録は作業言語で書き、次に打てる入力を示してターンを終える。**

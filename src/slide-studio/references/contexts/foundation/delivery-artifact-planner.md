@@ -37,8 +37,8 @@ template_profile:
     - name: タイトルとコンテンツ
       placeholders: [title, body]
   theme:
-    fonts: {major: null, minor: null}
-    colors: {dk1: null, lt1: null, accent1: null}
+    fonts: {major: <未取得>, minor: <未取得>}   # inspected: false のとき
+    colors: {dk1: <未取得>, lt1: <未取得>, accent1: <未取得>}
   sample_slides_to_remove: 0
   notes: |
 variants:
@@ -61,7 +61,7 @@ open_questions: []
 ## 手順
 
 1. `pptx_template` が提供されているか確認する。brief の `materials` に無い、または実体を参照できないなら `BLOCKED` とし、テンプレートの提供を求める
-2. コード実行機能でテンプレートを検査し、スライドサイズ・レイアウトとプレースホルダ・テーマのフォントと色・除くべきサンプル Slide を記録する (`inspected: true`)。コード実行が使えない環境では、ユーザーの説明を転記して `inspected: false` とし、不足する事実を `open_questions` に書く。推測で埋めない
+2. コード実行機能でテンプレートを検査し、スライドサイズ・レイアウトとプレースホルダ・テーマのフォントと色・除くべきサンプル Slide を記録する (`inspected: true`)。コード実行が使えない環境では、ユーザーの説明を転記して `inspected: false` とし、取得できていない項目を `<未取得>` と書く。**「なし」「既定」と書かない** (I-18)。推測で埋めない
 3. `output_format` は `pptx` を既定にする。ユーザーが別形式を明示していればそれを記録する
 4. `variants` を決める。発表があれば `live_presentation`。`standalone_reading` が真、または brief に配布の希望があれば `handout` を別要件で置く。`delivery_mode` が録画・オンラインで後日配布があるなら `recording_support` を置く
 5. `image_handoff` を書く。本スキルは画像を生成せず、配置枠と受け渡し仕様を作ることを明記する

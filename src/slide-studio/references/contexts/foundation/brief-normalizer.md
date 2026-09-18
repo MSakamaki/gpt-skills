@@ -10,6 +10,7 @@
 
 - 目的・対象者・制約を推測で補わない。無い項目は `open_questions` に残す
 - **依頼のトーン・表記の指定に本 Artifact の書き方を合わせない** (I-15)。記録するだけで、記録自体は作業言語で書く
+- **未回答を「なし」「指定なし」「未指定」と書かない** (I-18)。`<未回答>` のまま下流へ渡す
 - 聴衆分析 (`audience-analyzer`)、成功条件の指標化 (`success-criteria-designer`)、構成案 (`deck-outline-designer`) を先取りしない
 - 元資料の内容を要約して事実を作らない。素材は「何があるか」を記録する
 
@@ -34,19 +35,17 @@ audience_as_stated: |      # 対象者 (依頼に書かれた範囲だけ。分�
 use_case: internal_report  # workshop | conference_talk | internal_report | decision_meeting | online_broadcast | other
 use_case_notes: |          # 分類の根拠となる依頼文。複数に当たるなら候補を併記し open_questions へ
 deliverable_voice:         # 成果物 (聴衆が読む・聞く文字列) に適用する声。作業の記録には適用しない
-  language: ja             # 聴衆が読む言語
-  script: なし             # 表記の制約 (ひらがな中心、漢字にふりがな など)。無ければ「なし」
-  tone: |                  # 明るく楽しく、落ち着いて など。無ければ「指定なし」
-  reading_level: |         # 想定読解水準 (幼稚園児、非専門の管理職 など)
-  stated_by_user: true     # 依頼に明示があったか。false なら対象者に合わせた既定である旨を書く
-  source_quote: |          # 依頼文からの引用 (stated_by_user が true のとき)
+  language: ja             # 依頼に「英語のスライドで」等があれば確定。無ければ <未回答>
+  script: <未回答>         # 表記の制約 (ひらがな中心、漢字にふりがな など)
+  tone: <未回答>           # 明るく楽しく、落ち着いて など
+  reading_level: <未回答>  # 想定読解水準 (幼稚園児、非専門の管理職 など)
+  source_quote: |          # 確定した項目について、依頼文からの引用
 constraints:
-  time_minutes: 10         # 未記載なら null
-  venue: |                 # 会場・配信・画面環境
-  language: ja             # 成果物の言語。正本は deliverable_voice.language
-  slide_count_request: |   # 依頼者の希望 (あれば)。枚数は初期値であり規則ではない
-  brand_or_template_rules: |
-  deadline: |
+  time_minutes: 10         # 依頼に無ければ <未回答>
+  venue: <未回答>          # 会場・配信・画面環境
+  slide_count_request: <未回答>   # 依頼者の希望。枚数は初期値であり規則ではない
+  brand_or_template_rules: <未回答>
+  deadline: <未回答>
   other: []
 materials:                 # 利用素材。テンプレートを含む
   - id: M1
@@ -55,18 +54,19 @@ materials:                 # 利用素材。テンプレートを含む
     availability: provided # provided | referenced_only | missing
     notes: |
 success_expectation: |     # 依頼者が期待する成功 (依頼者の言葉。指標化しない)
-open_questions:            # 依頼に無く、推測で埋めなかった事項
-  - 聴衆の人数と役職
-source_quotes:             # 各項目の出所 (依頼文からの引用)
+open_questions:            # <未回答> の項目と、それが何に効くか
+  - {field: deliverable_voice.tone, why_it_matters: 画面文章と話者の語調。slide-copywriter が要る}
+  - {field: audience.size, why_it_matters: 進行と参加機会の設計}
+source_quotes:             # 確定した項目の出所 (依頼文からの引用)
   purpose: "..."
 ```
 
 ## 手順
 
 1. `user_request` と `conversation_context` から、目的・対象者・ユースケース・制約・利用素材・成功期待に当たる記述を拾う。言い換えるときは元の引用を `source_quotes` に残す
-1a. トーン・表記・読解水準・言語の指定 (「明るく楽しく」「ひらがなで」「英語のスライドで」など) を `deliverable_voice` へ記録する。**これは成果物の声であり、本 Artifact 自身の書き方ではない。** 依頼がひらがな指定でも、この Artifact は作業言語 (日本語の常体) で書く。指定が無ければ `stated_by_user: false` とし、対象者から導いた既定であることを書く
+1a. トーン・表記・読解水準・言語の指定 (「明るく楽しく」「ひらがなで」「英語のスライドで」など) を `deliverable_voice` へ記録する。**これは成果物の声であり、本 Artifact 自身の書き方ではない。** 依頼がひらがな指定でも、この Artifact は作業言語 (日本語の常体) で書く。**依頼に無い項目は `<未回答>` とする。「指定なし」と書かない** (I-18)。この工程では声を使わないので、ここで確認する必要はない。文字列を書く Context が必要になった時点で確認する
 2. `source_materials` を `materials` へ列挙する。`pptx_template` があるか、参照だけか、無いかを必ず記録する。無ければ `open_questions` に「PPTX テンプレート未提供 (後工程 `delivery-artifact-planner` で必要)」と書く。ここでは BLOCKED にしない
-3. 依頼に無い項目は `open_questions` へ。「なし」と明示された項目は「なし」と書く。**未記載と「なし」を区別する**
+3. 依頼に無い項目は `<未回答>` とし、`open_questions` へ何に効くかとともに列挙する。**ユーザーが「制約はありません」と明示した項目だけ「なし」と書く** (I-18)。未記載を「なし」に読み替えない
 4. `use_case` はガイド §4 の分類に照らして決める。複数に当たる、または判断できないときは候補を併記して `open_questions` へ入れる。枚数や時間配分の目安をここで書かない
 5. 目的が依頼から読み取れない、または `user_request` が無いときは `BLOCKED` とし、何を教えてほしいかを `issues` に書く
 

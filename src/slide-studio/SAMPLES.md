@@ -63,9 +63,10 @@ inputs_used:
   - source_materials (company-template.potx, q2-sales.xlsx)
 output_artifact: presentation_brief v1
 clarifications:
-  - asked: 役員に何を決めてもらう場か
-    answered: A (Q3 継続の承認)
-    by: user
+  - field: purpose
+    asked: 役員に何を決めてもらう場か
+    state: answered
+    value: Q3 継続の承認
 issues:
   - 聴衆の人数と、承認に必要な決裁者が誰かが依頼に無い (open_questions に記録)
 recommended_next: brief-normalizer-reviewer
@@ -81,18 +82,18 @@ purpose: |
 audience_as_stated: 役員
 use_case: decision_meeting
 deliverable_voice:
-  language: ja
-  script: なし
-  tone: 指定なし
-  reading_level: 非専門の意思決定者
-  stated_by_user: false
+  language: <未回答>
+  script: <未回答>
+  tone: <未回答>
+  reading_level: <未回答>
 constraints:
   time_minutes: 10
 materials:
   - {id: M1, type: pptx_template, name: company-template.potx, availability: provided}
   - {id: M2, type: data, name: q2-sales.xlsx, availability: provided}
-open_questions:
-  - 聴衆の人数と決裁者
+open_questions:                    # <未回答> の項目と、それが何に効くか
+  - {field: deliverable_voice, why_it_matters: 画面文章と話者の語調。slide-copywriter が要る}
+  - {field: audience.size, why_it_matters: 進行と参加機会の設計}
 ```
 
 **次にすること**
@@ -265,12 +266,14 @@ slide_id: S03
 status: COMPLETE
 output_artifact: slide_assertion_spec@S03 v1
 clarifications:
-  - asked: S03 で聴衆に残したいこと
-    answered: B (新規顧客が伸びを作った)
-    by: user
-  - asked: 主張の強さ
-    answered: A (断定する)
-    by: user
+  - field: assertion
+    asked: S03 で聴衆に残したいこと
+    state: answered
+    value: 新規顧客が伸びを作った
+  - field: assertion_strength
+    asked: 主張の強さ
+    state: answered
+    value: 断定する
 recommended_next: slide-assertion-designer-reviewer
 ```
 
@@ -297,6 +300,33 @@ B. `slide-assertion-designer S03` — 決め直す
    確認の答えを変えたいときに選びます。v2 になります。
 
 9. それぞれを詳しく説明して、もう一度選び直す
+
+### 未回答をそのまま渡す
+
+依頼にトーンの指定が無いとき、「指定なし」とは書きません。未回答のまま残し、その値が必要になった工程が聞きます。
+
+```yaml
+deliverable_voice:
+  language: <未回答>
+  script: <未回答>
+  tone: <未回答>
+  reading_level: <未回答>
+```
+
+依頼の整理の時点では文字を書かないので、ここで聞く必要はありません。後で画面文章を書く工程に入ったとき、はじめてこう聞かれます。
+
+> 画面に出す文章の語調を確認させてください。役員向けという以外に指定が無いので、
+> まだ決まっていません。
+>
+> A. 事実を淡々と述べる
+>    …
+>
+> B. 決定を促す語調にする
+>    …
+>
+> 9. それぞれを詳しく説明して、もう一度選び直す
+
+「指定はありません」と答えれば、そこで初めて「なし」が確定した答えとして記録されます。未回答のままとは区別されます。
 
 ### まとめて委任する
 
@@ -585,7 +615,6 @@ deliverable_voice:
   script: ひらがな中心。漢字を使う場合はふりがな
   tone: 明るく楽しく
   reading_level: 幼稚園児
-  stated_by_user: true
   source_quote: 対象者は幼稚園児にも分かるように、トーンは明るく楽しく、ひらがなで
 ```
 

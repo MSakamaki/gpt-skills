@@ -18,7 +18,7 @@
 | Artifact | 使い方 |
 |---|---|
 | `slide_assertion_spec@S` | `assertion`、`takeaway`、`evidence_needed` (必要な証拠の種類) |
-| `source_materials?` | 証拠の出所。無ければ「なし」として扱い、必要な証拠があれば `BLOCKED` |
+| `source_materials?` | 証拠の出所。添付が無いことは観測できる事実として扱う。必要な証拠があれば `BLOCKED`。**「元資料はこれで全部か」が未確認なら `<未回答>` として記録する** |
 | `audience_profile` | 既有知識・専門性。残すべき情報の量 (軸・誤差・条件・n、前提) |
 
 ## 出力：`slide_evidence_pack@S`

@@ -1,6 +1,6 @@
 # スライド作成スタジオ
 
-スキル名：`slide-studio`　版：**1.3.0**  
+スキル名：`slide-studio`　版：**1.4.0**  
 初期版作成日・更新日：2026年9月19日
 
 ## できること
@@ -47,6 +47,8 @@ slide-studio を使って。役員向け 10 分の社内報告を作りたい。
 ```text
 最初の依頼 / A / 次へ → 確認ターン (論点を 1 つ) → 完了ターン (結果 + 次にすること)
 ```
+
+確認していない項目は「なし」ではなく**未回答**として残ります。あなたが「指定はありません」と答えたときだけ「なし」になります。未回答はそのまま後の工程へ渡り、その値が必要になった工程が改めて聞きます。依頼の時点で使わない指定を先回りして聞くことはしません。
 
 目的、優先順位、主張の強さなど本人が決めるべき論点には推奨を付けません。選択肢の違いを中立に説明します。「残りは任せる」と伝えれば埋めて進めますが、埋めた内容と根拠は記録に残ります。検証の工程 (Reviewer と Validator) は確認しません。判定に必要な事実が無ければ止まります。
 
@@ -114,12 +116,13 @@ slide-studio/
   README.md / CHANGELOG.md
   references/
     REGISTRY.md                 Context Registry (一覧・入出力・遷移・差し戻し先)
+    TURN-FORMATS.md             ターンの書き方と例 (条件付きで読む)
     domain-guide.md             ドメイン知識の正本 (§1〜§7 + 付録)
     test-cases.md               確認ケース
     contexts/<stage>/<context>.md   各 Context の手順 (69 本)
 ```
 
-実行時に読むのは `SKILL.md`、`REGISTRY.md`、対象の Context ファイル 1 本、その Context が指定するガイドの節だけです。README・SAMPLES・CHANGELOG・test-cases は保守と案内のための資料で、通常の実行では読みません。
+実行時に読むのは `SKILL.md`、`REGISTRY.md`、対象の Context ファイル 1 本、その Context が指定するガイドの節だけです。`TURN-FORMATS.md` は確認や差し戻しが要るときだけ読みます。README・SAMPLES・CHANGELOG・test-cases は保守と案内のための資料で、通常の実行では読みません。
 
 ## 検証状況
 

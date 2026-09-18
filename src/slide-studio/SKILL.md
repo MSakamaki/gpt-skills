@@ -37,7 +37,7 @@ description: >-
 
 「対象者は幼稚園児、明るく楽しくひらがなで」のような指定は**成果物の声**であって、作業の記録には適用しない。`audience_profile` や `review_result` をひらがなで書かない。逆に、成果物だけ英語にする依頼でも、作業の記録は日本語のままにする。
 
-各 Context ファイルの出力スキーマで `[成果物の声]` と印が付いた項目だけが成果物の声に従う。印の無い項目は作業言語で書く。`deliverable_voice` が未確定のうちは、対象者に合わせた既定を仮に使い、確定していないことを記録する。
+各 Context ファイルの出力スキーマで `[成果物の声]` と印が付いた項目だけが成果物の声に従う。印の無い項目は作業言語で書く。`deliverable_voice` の項目が未回答のうちは、それを「指定なし」と読み替えない。文字列を書く Context が、そのときに確認する。
 
 ## 起動と継続
 
@@ -63,6 +63,7 @@ description: >-
 | I-15 | **作業言語と成果物の声を分ける。** 成果物向けの言語・表記・トーン・読解水準の指定を、Artifact の記述・所見・案内・結果ブロックへ適用しない |
 | I-16 | **各ターンを選択式で終える。** 確認ターンは論点の選択肢で、完了ターンは結果ブロックと「次にすること」で終える |
 | I-17 | **推論で埋めるしかない点を、黙って埋めない。** 選択式で確認して埋めるか、ユーザーの明示的な委任を得て埋めて記録する |
+| I-18 | **未回答を「なし」と書かない。** 確定・委任・未回答を区別し、確認していない項目は `<未回答>` のまま下流へ渡す |
 
 ## Context の結果
 
@@ -86,10 +87,11 @@ inputs_used:
   - audience_profile v1
   - success_criteria v1
 output_artifact: slide_assertion_spec@S03 v1
-clarifications:            # 確認ターンで得た回答があれば
-  - asked: この Slide で聴衆に残したいこと
-    answered: B (新規顧客が伸びを作った)
-    by: user
+clarifications:            # 確認ターンで得た回答と、未回答のまま残した項目
+  - field: assertion
+    asked: この Slide で聴衆に残したいこと
+    state: answered        # answered | delegated | unanswered
+    value: 新規顧客が伸びを作った
 issues: []
 recommended_next: slide-assertion-designer-reviewer
 rollback_target: null
@@ -128,61 +130,50 @@ Context の実行は 1 ターンで終わるとは限らない。推論で埋め
 | 複数の読み方があり、どれを採るかで下流が変わる | 十分高い確度で読み取れる |
 | ユーザー本人の価値判断が要る (目的、優先順位、許容するリスク) | どう埋めても成果物がほぼ変わらない |
 | 上流どうしが矛盾しており、どちらを採るかで結果が分かれる | すでに同じことを確認済み |
+| **この工程の成果物を作るのに、いまその値が要る** | いま要らない。未回答のまま下流へ渡せる |
 
 確認自体を目的にしない。質問数の下限も固定数も設けない。**回答のたびに残る論点を評価し直す。** 1 つ答えると他が不要になることがある。事前に決めた質問列を機械的に消化しない。
 
 不足が「上流 Artifact が未承認」「外部入力が無い」なら確認ではなく `BLOCKED` とする。確認ターンは、上流はあるがその中に書かれていない細部や、複数の読み方を許す記述を埋めるためのものである。
 
-### 形式
+### 骨格
 
-1 ターンに 1 論点。記号は操作の選択肢と同じく `A` から始まるアルファベットと `9`。数字を使わない。
+1 ターンに 1 論点。記号は `A` から始まるアルファベットと `9`。数字を使わない。YAML を出さない。
 
 ```markdown
-この報告で役員に何を決めてもらうかを確認させてください。
-ここが変わると、構成の骨格と、どの証拠を最初に出すかが変わります。
+<何を決める必要があるかと、それが何を変えるかを 1〜2 文>
 
-A. Q3 も同じ予算で施策を続けることへの承認
-   求める決定を最初の Slide に置き、Q2 の実績をその根拠として並べます。
-   判断に要る材料は、継続した場合の見込みと、やめた場合の影響です。
+A. <選択肢>
+   <選ぶと成果物がどう変わるか / 後の工程にどう効くか>
 
-B. Q3 の予算額そのものの決定
-   金額の選択肢を比較する構成になり、案ごとの効果と費用が要ります。
-   Q2 の実績は前提の確認に下がります。
-
-C. 決定は求めず、状況の共有だけ
-   結論を先に置く構成ではなくなり、成功条件も「理解」に寄ります。
+B. <選択肢>
+   <同上>
 
 9. それぞれを詳しく説明して、もう一度選び直す
 
 A などの記号でも、自由入力でも答えられます。
 ```
 
-- 各選択肢には、**選ぶと成果物がどう変わるか**と、**後の工程にどう効くか**を書く。操作の選択肢の 4 観点はここでは使わない。論点は操作ではない
-- 上流 Artifact から妥当な既定を導けるなら `A` に置いて推奨とする。**ユーザー本人の価値判断にあたる論点には推奨を付けない。** この場合 `A` は単に最初の選択肢である
-- 選択肢は原則 4 つまで。数合わせで弱い選択肢を作らない。実質 2 案なら 2 案でよい
-- 委任できる論点では、委任を選択肢として明示する (例: `D. どちらでもよい。理由を記録して進める`)。価値判断の論点には委任の選択肢を置かない
-- `9` は何も決めず、各選択肢を詳しく説明して同じ論点を再提示する
-- 自由入力を常に有効とする。記号より具体的な指定を優先する
+上流から既定を導けるなら `A` を推奨とする。**ユーザー本人の価値判断にあたる論点には推奨も委任の選択肢も置かない。**
 
-### まとめて委任されたとき
+**選択肢の作り方、まとめて委任されたときの扱い、記録の形式は [ターンの書き方](references/TURN-FORMATS.md) §1 を読む。**
 
-「残りは任せる」と明示されたら、残る論点を埋めて進めてよい。埋めた内容と根拠を成果物へ記録し、完了ターンで一覧を示す。**黙って埋めることとは区別する。** 価値判断にあたる論点は、まとめての委任でも埋めず、その論点だけを改めて確認する。
+## 値の 3 つの状態
 
-### 記録
+確認して得た値と、確認していない値を混ぜない。Artifact のどの項目も次の 3 つのいずれかである。
 
-確認で得た回答を結果ブロックへ残す。聞いた内容と答えを対にして、後から監査できるようにする。
+| 状態 | 意味 | 書き方 |
+|---|---|---|
+| 確定 | ユーザーが答えた。「制約は無い」という答えを含む | 値を書く。`clarifications` に `state: answered` |
+| 委任 | ユーザーが明示的に任せ、こちらが埋めた | 値を書く。`clarifications` に `state: delegated` と `basis` |
+| 未回答 | 確認していない、または答えが得られていない | `<未回答>` と書く。**値を作らない** |
 
-```yaml
-clarifications:
-  - asked: 役員に何を決めてもらうか
-    answered: A (Q3 継続の承認)
-    by: user
-  - asked: 聴衆の人数
-    answered: 委任。8 名程度と仮定
-    by: user_delegated
-```
+**「なし」「指定なし」「未指定」「不明」「N/A」「-」を、確認していないことの言い換えとして使わない** (I-18)。これらは確定した答えと未回答を同じ見た目にしてしまい、下流はそれを決定済みとして扱う。
 
-成果物へ反映しきれなかった事項は、従来どおり `open_questions` に残す。
+- ユーザーが「指定はありません」と答えたときだけ「なし」と書ける。その場合の状態は**確定**である
+- 未回答は `<未回答>` のまま下流へ渡す。**下流はこれを「制約が無い」と読み替えてはならない。** その値が必要になった Context が、そのときに確認する
+- 未回答の項目は `open_questions` / `unknowns` に、何に効くかとともに列挙する
+- 機能や資料の制約で取得できていない事実は `<未取得>` と書く (テンプレートの検査結果、プレビュー画像など)。これも「なし」と書かない
 
 ## 次にすること (完了ターン)
 
@@ -194,17 +185,12 @@ clarifications:
 A. `次へ` — slide-assertion-designer-reviewer（推奨）
    いま作った S03 の主張を、別の Reviewer が検証します。主張が 1 つか、
    トピック名になっていないか、聴衆に残したい意味が明確かを見ます。
-   PASS なら証拠の選定へ進みます。FAIL なら差し戻し先が示され、
-   主張を作り直すことになります。
+   PASS なら証拠の選定へ進みます。FAIL なら差し戻し先が示されます。
    内容に自信があるときはこれを選びます。
    版が増えるだけで、前の版は残ります。
 
 B. `状況` — 進捗と実行できる工程の一覧
    何も実行せず、いまの状態だけを表示します。
-
-C. `slide-assertion-designer S03` — 主張を作り直す
-   Reviewer を通さずに v2 を作ります。指摘が既に自分で見えているときに
-   使います。v1 は残ります。
 
 9. それぞれを詳しく説明して、もう一度選び直す
 
@@ -234,51 +220,7 @@ A などの記号でも、工程名でも、自由入力でも答えられます
 
 初めて出る工程は 4 観点を厚く書く。同じ工程が再び出るときは薄くしてよい。`状況` のように毎ターン同じ意味で出る操作は 1〜2 行で足りる。1 つの選択肢が 30 行を超えるなら、それは `9` で扱う内容である。
 
-### FAIL のとき
-
-所見の要点を 1〜2 文の日本語で選択肢より先に書く。
-
-```markdown
-S03 の主張が「売上推移」というトピック名のままで、聴衆に何が残るかが
-読めません。数値の裏づけも上流の Artifact に無いものが入っています。
-
-**次にすること**
-
-A. `戻す` — slide-assertion-designer S03（推奨）
-   所見を読んだうえで、同じ Context が v2 を作ります。
-   トピック名を結論文に直し、裏づけの無い数値は証拠の選定へ回します。
-   v1 は残るので、比べ直せます。
-
-B. `slide-sequence-designer` — この Slide の役割自体を見直す
-   主張が立たないのは Slide の切り方が原因かもしれないときに選びます。
-   slide_sequence_plan が v2 になり、S03 以降の Slide 単位の成果物は
-   要再確認になります。戻す範囲が広いので、A で解けないと分かってから
-   選ぶほうが早く済みます。
-
-9. それぞれを詳しく説明して、もう一度選び直す
-```
-
-### BLOCKED のとき
-
-足りないものと入手方法を書く。ユーザーが渡す外部入力なら、渡す操作自体を `A` にしてよい。
-
-```markdown
-PPTX テンプレートがまだ無いため、配布形態を決められません。
-
-**次にすること**
-
-A. テンプレート (`.pptx` / `.potx`) をこの会話へ添付する（推奨）
-   スライドサイズ、レイアウト名、テーマの色とフォントを読み取って
-   delivery_artifact_plan に記録します。
-   これが無いと Rendering / Build / Delivery の全工程が止まります。
-   推測でテンプレートを作ることはしません。
-   添付したらもう一度この工程を実行します。
-
-B. `deck-outline-designer` — テンプレート無しでも進む構成設計を先にやる
-   内容の設計はテンプレートに依存しません。並行して進められます。
-
-9. それぞれを詳しく説明して、もう一度選び直す
-```
+**`FAIL` と `BLOCKED` のときの書き方は [ターンの書き方](references/TURN-FORMATS.md) §2 / §3 を読む。**
 
 ### 回答の解釈
 
@@ -316,23 +258,7 @@ based_on:
 - 上流 Artifact の版が上がったら、それに基づく下流 Artifact は**要再確認**になる。Router は結果の `issues` で知らせるが、作り直すかどうかは人間が決める
 - 人間が Reviewer を経ずに承認したい場合は「`<artifact_id>` を承認する」と明示する。Router は結果に `人間承認 (Reviewer 未実施)` と記録する。Validator (`accessibility-validator` 以降) は人間承認で代替できない
 
-Reviewer と Validator の出力は次の形とする。
-
-```yaml
-artifact: review_result
-reviewer: slide-assertion-designer-reviewer
-target: slide_assertion_spec@S03 v1
-verdict: FAIL                # PASS | FAIL
-findings:
-  - severity: MAJOR          # CRITICAL | MAJOR | MINOR
-    where: headline
-    issue: 見出しが「売上推移」というトピック名で、結論が読めない
-    evidence: domain-guide.md §3 見出し行 / slide_sequence_item@S03.purpose
-    rollback_target: slide-assertion-designer
-recommended_next: slide-assertion-designer
-```
-
-`CRITICAL` または `MAJOR` が 1 つでもあれば `FAIL`。`MINOR` だけなら `PASS` とし、所見は下流への注意として残す (Reviewer が直さない)。
+Reviewer と Validator は `review_result` を出す。形式と `severity` の扱いは [ターンの書き方](references/TURN-FORMATS.md) §5 を読む。`CRITICAL` または `MAJOR` が 1 つでもあれば `FAIL`、`MINOR` だけなら `PASS` として所見を下流への注意に残す。
 
 ## Router の手順 (毎 Turn)
 
@@ -340,7 +266,7 @@ recommended_next: slide-assertion-designer
 2. **操作を解釈する。** 次の「ユーザー操作の解釈」に従い、対象 Context と (Slide 単位なら) `slide_id` を 1 つ決める。決まらなければ `workflow-navigator` を実行する
 3. **`references/REGISTRY.md` を読む。** 対象 Context の行から `requires` `produces` `next` `rollback_candidates` `stage` を得る。行が無ければ `workflow-navigator` で一覧を示す
 4. **前提 Artifact を確認する。** `requires` の各 Artifact が会話中 (ファイルが使える環境ではファイルも) に存在し、承認済みであることを確かめる。外部入力は存在だけを確かめる。満たされなければ `BLOCKED` を返して終了する。**不足を推測で補わない**
-5. **対象 Context だけを読み込む。** `references/contexts/` 配下の `<stage>/<context>.md` を 1 つだけ読む。他の Context ファイルを読まない。その Context ファイルが指定する `references/domain-guide.md` の節だけを読む
+5. **対象 Context だけを読み込む。** `references/contexts/` 配下の `<stage>/<context>.md` を 1 つだけ読む。他の Context ファイルを読まない。その Context ファイルが指定する `references/domain-guide.md` の節だけを読む。確認ターンを出すとき、`FAIL` / `BLOCKED` を返すとき、`review_result` を書くときは `references/TURN-FORMATS.md` の該当節も読む
 6. **実行する。** Context ファイルの手順に従う。Specialist では、推論で埋めるしかない点が残っていないかを先に見る。残っていれば**確認ターン**を出してそのターンを終える (I-17)。残っていなければ Artifact を作る。Reviewer / Validator は確認せず `review_result` を出す
 7. **完了ターンでは、結果ブロックと選択式の「次にすること」を出して終了する。** `recommended_next` を `A` に置き、他に実行可能な Context があれば `B` 以降に並べ、`9` を添える。`FAIL` なら `rollback_target` を示す。確認で得た回答は `clarifications` に残す。**次の Context を続けて実行しない**
 
@@ -372,17 +298,7 @@ Router がやってはならないこと。Context の中身を先読みして�
 
 ## 差し戻しの原則
 
-Reviewer は「直前の Context」へ機械的に戻さず、**問題を生成した最小の上流責務**へ戻す。Registry の `rollback_candidates` から選ぶ。
-
-| 問題 | rollback_target |
-|---|---|
-| Chart の描画崩れ | `chart-renderer` |
-| Chart の種類自体が不適切 | `chart-designer` |
-| Chart を使うべきではなかった | `visual-medium-router` |
-| 根拠そのものが弱い | `slide-evidence-selector` |
-| 主張が不適切 | `slide-assertion-designer` |
-| Slide 自体が不要 / 役割が違う | `slide-sequence-designer` |
-| 聴衆の前提が違う | `audience-analyzer` |
+Reviewer は「直前の Context」へ機械的に戻さず、**問題を生成した最小の上流責務**へ戻す。Registry の `rollback_candidates` から選ぶ。**問題と差し戻し先の対応表は [ターンの書き方](references/TURN-FORMATS.md) §4 にある。**
 
 差し戻された Designer は、`review_result` の所見を読んで新しい版を作る。所見を無視して同じ内容を再提出しない。上流に問題がある場合は自分で直さず、自分の結果を `BLOCKED` にして更に上流への差し戻しを提案する。
 
@@ -424,6 +340,7 @@ Foundation と Deck Design は Deck 全体で 1 回。`slide_sequence_plan` が�
 - Reviewer による自動修正
 - Context に不足する情報の勝手な推測。確認せずに推論で埋めること
 - 確認ターンで結果ブロックや生成途中の Artifact を YAML で出すこと
+- 未回答の項目を「なし」「指定なし」「未指定」「不明」と書くこと。未回答を「制約が無い」と読み替えること
 - Reviewer と Validator が判定の内容をユーザーへ聞くこと
 - ユーザー本人の価値判断にあたる論点へ推奨や委任の選択肢を置くこと
 - 全 Slide への assertion–evidence の強制
@@ -439,6 +356,6 @@ Foundation と Deck Design は Deck 全体で 1 回。`slide_sequence_plan` が�
 
 ## 保守と確認
 
-実行規則の正本はこの `SKILL.md`、Context の一覧と遷移は `references/REGISTRY.md`、各 Context の手順は `references/contexts/`、ドメイン知識は `references/domain-guide.md`。導入と環境差は [README](README.md)、ターンの並びの例は [進行例](SAMPLES.md)、変更内容は [更新履歴](CHANGELOG.md)、受入テストの期待結果は [確認ケース](references/test-cases.md) を参照する。通常の実行でこれらの保守資料を読み込まない。
+実行規則の正本はこの `SKILL.md`、Context の一覧と遷移は `references/REGISTRY.md`、各 Context の手順は `references/contexts/`、ターンの書き方の詳細は `references/TURN-FORMATS.md`、ドメイン知識は `references/domain-guide.md`。導入と環境差は [README](README.md)、ターンの並びの例は [進行例](SAMPLES.md)、変更内容は [更新履歴](CHANGELOG.md)、受入テストの期待結果は [確認ケース](references/test-cases.md) を参照する。通常の実行でこれらの保守資料を読み込まない。
 
 ファイル構造や文面の静的検査だけで、実際の明示起動・1 Turn 1 Context・差し戻し・生成物の品質を検証済みと報告しない。
